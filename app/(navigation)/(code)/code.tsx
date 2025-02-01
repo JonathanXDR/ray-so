@@ -8,7 +8,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import { useSectionInView, useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { BlankDocumentIcon, ChevronDownIcon, Info01Icon, MagnifyingGlassIcon, TrashIcon } from "@raycast/icons";
+import { SelectionEvent } from "@viselect/react";
 import { useAtom } from "jotai";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { getHighlighterCore, Highlighter } from "shiki";
 import getWasm from "shiki/wasm";
@@ -17,21 +19,22 @@ import tailwindLight from "./assets/tailwind/light.json";
 import styles from "./code.module.css";
 import Controls from "./components/Controls";
 import ExportButton from "./components/ExportButton";
+import FileUpload from "./components/FileUpload";
 import FormatButton from "./components/FormatCodeButton";
 import Frame from "./components/Frame";
 import { InfoDialog } from "./components/InfoDialog";
 import { Instructions } from "./components/Instructions";
 import NoSSR from "./components/NoSSR";
-import PatchUploader from "./components/PatchUploader";
-import { usePatchFiles } from "./hooks/usePatchFiles";
-import { PatchFile } from "./lib/types";
+import { usePatchFiles } from "./hooks/useFiles";
+import { File } from "./lib/types";
 import { highlighterAtom } from "./store";
 import FrameContextStore from "./store/FrameContextStore";
 import { shikiTheme } from "./store/themes";
+import { isTouchDevice } from "./util/isTouchDevice";
 import { LANGUAGES } from "./util/languages";
 
-function extractFiles(elements: Element[], files: PatchFile[]): PatchFile[] {
-  const result: PatchFile[] = [];
+function extractFiles(elements: Element[], files: File[]): File[] {
+  const result: File[] = [];
   for (const el of elements) {
     const fileName = el.getAttribute("data-file-name");
     if (!fileName) continue;
@@ -46,14 +49,14 @@ export function Code() {
   const { patchFiles, currentPatch, handleFilesSelected, handleChangeFile } = usePatchFiles();
 
   const [search, setSearch] = useState("");
-  const [selectedFileNames, setSelectedFileNames] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
   useEffect(() => {
-    if (selectedFileNames.length === 1) {
-      const single = patchFiles.find((f) => f.fileName === selectedFileNames[0]);
+    if (selectedFiles.length === 1) {
+      const single = patchFiles.find((f) => f.fileName === selectedFiles[0]);
       if (single) handleChangeFile(single);
     }
-  }, [selectedFileNames, patchFiles, handleChangeFile]);
+  }, [selectedFiles, patchFiles, handleChangeFile]);
 
   const filteredFiles = patchFiles.filter((f) => f.fileName.toLowerCase().includes(search.toLowerCase()));
 
@@ -63,24 +66,39 @@ export function Code() {
     setEnableViewObserver(true);
   }, []);
 
-  const onStart = () => {};
+  const onStart = ({ event, selection }: SelectionEvent) => {
+    if (!isTouch && !event?.ctrlKey && !event?.metaKey) {
+      selection.clearSelection();
+      setSelectedFiles([]);
+    }
+  };
+
   const onMove = ({
     store: {
       changed: { added, removed },
     },
-  }: any) => {
+  }: SelectionEvent) => {
     const addedFiles = extractFiles(added, patchFiles);
     const removedFiles = extractFiles(removed, patchFiles);
 
-    setSelectedFileNames((prev) => {
-      let next = [...prev];
-      for (const file of addedFiles) {
-        if (!next.includes(file.fileName)) next.push(file.fileName);
-      }
-      for (const file of removedFiles) {
-        next = next.filter((fn) => fn !== file.fileName);
-      }
-      return next;
+    setSelectedFileIds((prevFileIds) => {
+      let fileIds = [...prevFileIds];
+
+      addedFiles.forEach((file) => {
+        if (!file) {
+          return;
+        }
+        if (fileIds.includes(file.id)) {
+          return;
+        }
+        fileIds.push(file.id);
+      });
+
+      removedFiles.forEach((file) => {
+        fileIds = fileIds.filter((s) => s !== file?.id);
+      });
+
+      return fileIds;
     });
   };
 
@@ -95,6 +113,91 @@ export function Code() {
       setHighlighter(loaded as Highlighter);
     });
   }, []);
+
+  const [selectedFileIds, setSelectedFileIds] = React.useState<string[]>([]);
+
+  const router = useRouter();
+
+  const [actionsOpen, setActionsOpen] = React.useState(false);
+  const [isTouch, setIsTouch] = React.useState<boolean>();
+
+  // const handleDownload = React.useCallback(() => {
+  //   downloadData(selectedQuicklinks);
+  // }, [selectedQuicklinks]);
+
+  // const handleCopyData = React.useCallback(() => {
+  //   copyData(selectedQuicklinks);
+  //   toast.success("Copied to clipboard!");
+  // }, [selectedQuicklinks]);
+
+  // const handleCopyUrl = React.useCallback(async () => {
+  //   const url = makeUrl(selectedQuicklinks);
+  //   toast.promise(
+  //     shortenUrl(url, "quicklinks").then((urlToCopy) => {
+  //       if (urlToCopy === null) return null;
+
+  //       copy(urlToCopy);
+  //       return "Copied URL to clipboard!";
+  //     }),
+  //     {
+  //       loading: "Copying URL to clipboard...",
+  //       success: "Copied URL to clipboard!",
+  //       error: "Failed to copy URL to clipboard",
+  //     },
+  //   );
+  // }, [selectedQuicklinks]);
+
+  // const handleAddToRaycast = React.useCallback(
+  //   () => addToRaycast(router, selectedQuicklinks),
+  //   [router, selectedQuicklinks],
+  // );
+
+  React.useEffect(() => {
+    setIsTouch(isTouchDevice());
+    setEnableViewObserver(true);
+  }, [isTouch, setIsTouch, setEnableViewObserver]);
+
+  // React.useEffect(() => {
+  //   const down = (event: KeyboardEvent) => {
+  //     const { key, keyCode, metaKey, shiftKey, altKey } = event;
+
+  //     if (key === "k" && metaKey) {
+  //       if (selectedQuicklinks.length === 0) return;
+  //       setActionsOpen((prevOpen) => {
+  //         return !prevOpen;
+  //       });
+  //     }
+
+  //     if (key === "d" && metaKey) {
+  //       if (selectedQuicklinks.length === 0) return;
+  //       event.preventDefault();
+  //       handleDownload();
+  //     }
+
+  //     if (key === "Enter" && metaKey) {
+  //       if (selectedQuicklinks.length === 0) return;
+  //       event.preventDefault();
+  //       handleAddToRaycast();
+  //     }
+
+  //     // key === "c" doesn't work when using alt key, so we use keCode instead (67)
+  //     if (keyCode === 67 && metaKey && altKey) {
+  //       if (selectedQuicklinks.length === 0) return;
+  //       event.preventDefault();
+  //       handleCopyData();
+  //       setActionsOpen(false);
+  //     }
+
+  //     if (key === "c" && metaKey && shiftKey) {
+  //       event.preventDefault();
+  //       handleCopyUrl();
+  //       setActionsOpen(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("keydown", down);
+  //   return () => document.removeEventListener("keydown", down);
+  // }, [setActionsOpen, selectedQuicklinks, handleCopyData, handleDownload, handleCopyUrl, handleAddToRaycast]);
 
   return (
     <FrameContextStore>
@@ -126,7 +229,7 @@ export function Code() {
                         <MagnifyingGlassIcon className="w-3.5 h-3.5" />
                       </InputSlot>
                     </Input>
-                    <PatchUploader onFilesSelected={handleFilesSelected} />
+                    <FileUpload onFilesSelected={handleFilesSelected} />
                   </div>
 
                   {filteredFiles.length ? <p className={styles.sidebarTitle}>Files</p> : null}
@@ -137,11 +240,11 @@ export function Code() {
                         <NavItem
                           key={file.fileName}
                           file={file}
-                          isActive={selectedFileNames.includes(file.fileName)}
+                          isActive={selectedFiles.includes(file.fileName)}
                           onSelect={(e) => {
                             e.preventDefault();
 
-                            setSelectedFileNames((prev) => {
+                            setSelectedFiles((prev) => {
                               return prev.includes(file.fileName)
                                 ? prev.filter((f) => f !== file.fileName)
                                 : [...prev, file.fileName];
@@ -179,28 +282,28 @@ export function Code() {
                   </>
                 )}
 
-                {!(selectedFileNames.length > 1) && <Instructions />}
+                {!(selectedFiles.length > 1) && <Instructions />}
 
-                {selectedFileNames.length > 1 && (
+                {selectedFiles.length > 1 && (
                   <div>
                     <p className={styles.sidebarTitle}>Export images</p>
 
                     <Collapsible.Root>
                       <Collapsible.Trigger asChild>
                         <button className={styles.summaryTrigger}>
-                          {selectedFileNames.length} {selectedFileNames.length > 1 ? "Files" : "File"} selected
+                          {selectedFiles.length} {selectedFiles.length > 1 ? "Files" : "File"} selected
                           <ChevronDownIcon />
                         </button>
                       </Collapsible.Trigger>
 
                       <Collapsible.Content className={styles.summaryContent}>
-                        {selectedFileNames.map((fn) => (
+                        {selectedFiles.map((fn) => (
                           <div key={fn} className={styles.summaryItem}>
                             {fn}
                             <button
                               className={styles.summaryItemButton}
                               onClick={() => {
-                                setSelectedFileNames((prev) => prev.filter((p) => p !== fn));
+                                setSelectedFiles((prev) => prev.filter((p) => p !== fn));
                               }}
                             >
                               <TrashIcon />
@@ -213,7 +316,7 @@ export function Code() {
                     <div className={styles.summaryControls}>
                       <ExportButton />
 
-                      <Button onClick={() => setSelectedFileNames([])}>Clear selected</Button>
+                      <Button onClick={() => setSelectedFiles([])}>Clear selected</Button>
                     </div>
                   </div>
                 )}
@@ -238,24 +341,18 @@ function NavItem({
   isActive,
   onSelect,
 }: {
-  file: PatchFile;
+  file: File;
   isActive: boolean;
-  onSelect: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  onSelect: (e: React.MouseEvent<HTMLLIElement>) => void;
 }) {
   const activeSection = useSectionInView();
 
   return (
-    <a
-      href="#"
-      onClick={onSelect}
-      className={styles.sidebarNavItem}
-      data-active={isActive}
-      data-file-name={file.fileName}
-    >
+    <li onClick={onSelect} className={styles.sidebarNavItem} data-active={isActive} data-file-name={file.fileName}>
       <BlankDocumentIcon />
 
       <span className={styles.fileName}>{file.fileName}</span>
       <span className={styles.badge}>0</span>
-    </a>
+    </li>
   );
 }

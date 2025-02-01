@@ -15,8 +15,8 @@ export function Instructions() {
 
       <h3 className={styles.title}>Download multiple images</h3>
       <p className={styles.description}>
-        Select a file by clicking on it. Hold <kbd data-variant="small">⌘</kbd> to select multiple. Click{" "}
-        <strong>Export images</strong> to download them as images.
+        Select a file by clicking on it to customize it&apos;s appearance. Hold <kbd data-variant="small">⌘</kbd> to
+        select multiple. Click <strong>Export images</strong> to download them as images.
       </p>
 
       <div className="w-full flex justify-center">

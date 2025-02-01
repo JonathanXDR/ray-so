@@ -3,9 +3,9 @@
 import { Button } from "@/components/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@raycast/icons";
 import { useState } from "react";
-import { PatchFile } from "../lib/types";
+import { File } from "../lib/types";
 
-export function PatchFileCarousel({
+export function FileCarousel({
   children,
   files,
   onChangeFile,
@@ -13,8 +13,8 @@ export function PatchFileCarousel({
   ...props
 }: {
   children?: React.ReactNode;
-  files: PatchFile[];
-  onChangeFile: (file: PatchFile, index: number) => void;
+  files: File[];
+  onChangeFile: (file: File, index: number) => void;
   showButtons?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const [currentIndex, setCurrentIndex] = useState(0);

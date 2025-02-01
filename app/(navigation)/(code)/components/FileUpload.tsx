@@ -4,14 +4,10 @@ import { Button } from "@/components/button";
 import { toast } from "@/components/toast";
 import { CircleProgressIcon, UploadIcon } from "@raycast/icons";
 import React, { useState } from "react";
-import { PatchFile } from "../lib/types";
+import * as uuid from "uuid";
+import { File } from "../lib/types";
 
-export default function PatchUploader({
-  onFilesSelected,
-  ...props
-}: {
-  onFilesSelected: (files: PatchFile[]) => void;
-}) {
+export default function FileUpload({ onFilesSelected, ...props }: { onFilesSelected: (files: File[]) => void }) {
   const [uploading, setUploading] = useState(false);
   const [fileNames, setFileNames] = useState<string[]>([]);
 
@@ -42,8 +38,8 @@ export default function PatchUploader({
 
       const patchFiles = data.results.map((resItem: any) => ({
         fileName: resItem.fileName,
-        code: resItem.code || "",
-      })) as PatchFile[];
+        id: uuid.v7(),
+      })) as File[];
 
       onFilesSelected(patchFiles);
       setFileNames(patchFiles.map((pf) => pf.fileName));
@@ -57,7 +53,7 @@ export default function PatchUploader({
 
   return (
     <div className="flex flex-col gap-3 mb-3" {...props}>
-      <Button iconOnly size="large" title="Upload your own SVG" className="relative" disabled={uploading}>
+      <Button iconOnly size="large" title="Upload files" className="relative" disabled={uploading}>
         <input
           type="file"
           className="absolute top-0 right-0 bottom-0 left-0 cursor-pointer opacity-0"

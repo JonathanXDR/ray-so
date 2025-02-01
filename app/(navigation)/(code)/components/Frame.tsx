@@ -5,7 +5,7 @@ import clerkPattern from "../assets/clerk/pattern.svg?url";
 import mintlifyPatternDark from "../assets/mintlify-pattern-dark.svg?url";
 import mintlifyPatternLight from "../assets/mintlify-pattern-light.svg?url";
 import beams from "../assets/tailwind/beams.png";
-import { usePatchFiles } from "../hooks/usePatchFiles";
+import { usePatchFiles } from "../hooks/useFiles";
 import { fileNameAtom, showBackgroundAtom } from "../store";
 import { codeAtom, selectedLanguageAtom } from "../store/code";
 import { FrameContext } from "../store/FrameContextStore";

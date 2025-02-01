@@ -1,4 +1,4 @@
-export type PatchFile = {
+export type File = {
   fileName: string;
-  code: string;
+  id: string;
 };

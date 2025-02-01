@@ -1,12 +1,12 @@
 "use client";
 import { useState } from "react";
-import { PatchFile } from "../lib/types";
+import { File } from "../lib/types";
 
 export function usePatchFiles() {
-  const [patchFiles, setPatchFiles] = useState<PatchFile[]>([]);
-  const [currentPatch, setCurrentPatch] = useState<PatchFile | null>(null);
+  const [patchFiles, setPatchFiles] = useState<File[]>([]);
+  const [currentPatch, setCurrentPatch] = useState<File | null>(null);
 
-  function handleFilesSelected(files: PatchFile[]) {
+  function handleFilesSelected(files: File[]) {
     setPatchFiles(files);
 
     if (files.length > 0) {
@@ -14,7 +14,7 @@ export function usePatchFiles() {
     }
   }
 
-  function handleChangeFile(file: PatchFile) {
+  function handleChangeFile(file: File) {
     setCurrentPatch(file);
   }
 

@@ -109,7 +109,7 @@
 
 @keyframes fadeColorToRed {
   to {
-    color: rgba(255, 99, 99, 0.3);
+    color: rgba(255, 99, 99, 0.5);
   }
 }
 

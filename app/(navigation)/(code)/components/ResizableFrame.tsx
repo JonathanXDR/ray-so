@@ -3,16 +3,16 @@ import { useAtom } from "jotai";
 import React, { MouseEventHandler, PropsWithChildren, useCallback, useRef, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 import XMarkIcon from "../assets/icons/x-mark-circle-filled-16.svg";
-import { PatchFile } from "../lib/types";
+import { File } from "../lib/types";
 import { windowWidthAtom } from "../store";
-import { PatchFileCarousel } from "./PatchFileCarousel";
+import { FileCarousel } from "./FileCarousel";
 import styles from "./ResizableFrame.module.css";
 
 type Handle = "right" | "left";
 
 interface ResizableFrameProps extends PropsWithChildren {
-  files: PatchFile[];
-  onChangeFile: (file: PatchFile, index: number) => void;
+  files: File[];
+  onChangeFile: (file: File, index: number) => void;
 }
 
 let maxWidth = 920;
@@ -96,7 +96,7 @@ const ResizableFrame: React.FC<ResizableFrameProps> = ({ children, files, onChan
       </div>
 
       {!!windowWidth && (
-        <PatchFileCarousel
+        <FileCarousel
           className="flex w-full mt-[1em]"
           files={files}
           onChangeFile={onChangeFile}
@@ -144,7 +144,7 @@ const ResizableFrame: React.FC<ResizableFrameProps> = ({ children, files, onChan
               <span>{windowWidth} px</span>
             </div>
           </CSSTransition>
-        </PatchFileCarousel>
+        </FileCarousel>
       )}
     </div>
   );
