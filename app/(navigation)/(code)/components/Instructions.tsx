@@ -1,4 +1,5 @@
-import { Button } from "@/components/button";
+import { BlankDocumentIcon } from "@raycast/icons";
+import ExportButton from "./ExportButton";
 import styles from "./Instructions.module.css";
 
 export function Instructions() {
@@ -12,15 +13,15 @@ export function Instructions() {
         <Cursor />
       </div>
 
-      <h3 className={styles.title}>Download diffs</h3>
+      <h3 className={styles.title}>Download multiple images</h3>
       <p className={styles.description}>
         Select a file by clicking on it. Hold <kbd data-variant="small">⌘</kbd> to select multiple. Click{" "}
-        <strong>Export images</strong> to download them directly.
+        <strong>Export images</strong> to download them as images.
       </p>
 
-      <Button variant="primary" disabled>
-        Export images
-      </Button>
+      <div className="w-full flex justify-center">
+        <ExportButton disabled />
+      </div>
     </div>
   );
 }
@@ -28,8 +29,7 @@ export function Instructions() {
 function Skeleton({ selected = false }) {
   return (
     <div className={styles.skeleton} data-selected={selected}>
-      <div className={styles.skeletonPrimary} />
-      <div className={styles.skeletonSecondary} />
+      <BlankDocumentIcon className={styles.skeletonPrimary} data-selected={selected} />
     </div>
   );
 }

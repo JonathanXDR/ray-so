@@ -11,8 +11,8 @@
   transform: translateY(50%);
 
   & button {
-    width: calc(100% - 24px - 24px);
-    justify-content: center;
+    padding-right: 0.5rem !important;
+    padding-left: 0.5rem !important;
   }
 }
 
@@ -55,7 +55,6 @@
 .skeleton {
   display: flex;
   width: 40px;
-  height: 48px;
   flex-direction: column;
   align-items: center;
   padding: 10px 0;
@@ -67,6 +66,7 @@
   &[data-selected="true"] {
     animation:
       fadeBgToRed 100ms 2850ms ease-out forwards,
+      fadeColorToRed 100ms 2850ms ease-out forwards,
       fadeBorderToRed 100ms 2850ms ease-out forwards;
   }
 }
@@ -75,10 +75,10 @@
   width: 20px;
   height: 20px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.3);
 
   [data-selected="true"] > & {
-    animation: fadeBgToRed 100ms 2850ms ease-out forwards;
+    animation: fadeColorToRed 100ms 2850ms ease-out forwards;
   }
 }
 
@@ -86,7 +86,7 @@
   width: 24px;
   height: 3px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.3);
 
   [data-selected="true"] > & {
     animation: fadeBgToRed 100ms 2850ms ease-out forwards;
@@ -104,6 +104,12 @@
 @keyframes fadeBgToRed {
   to {
     background: rgba(255, 99, 99, 0.1);
+  }
+}
+
+@keyframes fadeColorToRed {
+  to {
+    color: rgba(255, 99, 99, 0.3);
   }
 }
 

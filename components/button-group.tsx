@@ -1,3 +1,10 @@
-export function ButtonGroup({ children }: { children: React.ReactNode }) {
-  return <span className="buttonGroup">{children}</span>;
+export function ButtonGroup({
+  children,
+  ...props
+}: { children: React.ReactNode } & React.HTMLAttributes<HTMLSpanElement>) {
+  return (
+    <span className="buttonGroup" {...props}>
+      {children}
+    </span>
+  );
 }
