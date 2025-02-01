@@ -1,25 +1,22 @@
 import classNames from "classnames";
-import { useAtom, useAtomValue } from "jotai";
-import React, { useContext } from "react";
-
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import React, { useContext, useEffect } from "react";
+import clerkPattern from "../assets/clerk/pattern.svg?url";
+import mintlifyPatternDark from "../assets/mintlify-pattern-dark.svg?url";
+import mintlifyPatternLight from "../assets/mintlify-pattern-light.svg?url";
+import beams from "../assets/tailwind/beams.png";
+import { usePatchFiles } from "../hooks/usePatchFiles";
 import { fileNameAtom, showBackgroundAtom } from "../store";
+import { codeAtom, selectedLanguageAtom } from "../store/code";
 import { FrameContext } from "../store/FrameContextStore";
 import { paddingAtom } from "../store/padding";
 import { THEMES, darkModeAtom, themeAtom, themeBackgroundAtom } from "../store/themes";
 import useIsSafari from "../util/useIsSafari";
-
 import Editor from "./Editor";
 import FlashMessage from "./FlashMessage";
-import ResizableFrame from "./ResizableFrame";
-
 import styles from "./Frame.module.css";
-import { selectedLanguageAtom } from "../store/code";
-
-import beams from "../assets/tailwind/beams.png";
-import mintlifyPatternDark from "../assets/mintlify-pattern-dark.svg?url";
-import mintlifyPatternLight from "../assets/mintlify-pattern-light.svg?url";
-
-import clerkPattern from "../assets/clerk/pattern.svg?url";
+import PatchUploader from "./PatchUploader";
+import ResizableFrame from "./ResizableFrame";
 
 const VercelFrame = () => {
   const [darkMode] = useAtom(darkModeAtom);
@@ -303,8 +300,19 @@ const DefaultFrame = () => {
   );
 };
 
-const Frame = ({ resize = true }: { resize?: boolean }) => {
+interface FrameProps {
+  resize?: boolean;
+  code?: string;
+}
+
+const Frame = ({ resize = true, code }: FrameProps) => {
   const frameContext = useContext(FrameContext);
+  const setCode = useSetAtom(codeAtom);
+  const { patchFiles, currentPatch, handleFilesSelected, handleChangeFile } = usePatchFiles();
+
+  useEffect(() => {
+    if (code) setCode(code);
+  }, [code, setCode]);
   const [theme] = useAtom(themeAtom);
   const darkMode = useAtomValue(darkModeAtom);
 
@@ -330,24 +338,18 @@ const Frame = ({ resize = true }: { resize?: boolean }) => {
     }
   }
 
-  if (!resize) {
-    return (
-      <div className={styles.frameContainer}>
-        <div className={styles.outerFrame} ref={frameContext} id="frame">
-          {renderFrame()}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={styles.frameContainer} data-theme={darkMode ? "dark" : "light"}>
-      <ResizableFrame>
+      <ResizableFrame files={patchFiles} onChangeFile={handleChangeFile}>
         <FlashMessage />
         <div className={styles.outerFrame} ref={frameContext} id="frame">
           {renderFrame()}
         </div>
       </ResizableFrame>
+
+      <div className={styles.patchUploader}>
+        <PatchUploader onFilesSelected={handleFilesSelected} />
+      </div>
     </div>
   );
 };

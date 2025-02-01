@@ -1,15 +1,18 @@
+import classNames from "classnames";
+import { useAtom, useSetAtom } from "jotai";
 import React, {
-  useCallback,
-  KeyboardEventHandler,
-  useRef,
   ChangeEventHandler,
   FocusEventHandler,
-  useState,
+  KeyboardEventHandler,
+  useCallback,
   useEffect,
+  useRef,
+  useState,
 } from "react";
-import styles from "./Editor.module.css";
-import { useAtom, useSetAtom } from "jotai";
+import useHotkeys from "../../../../utils/useHotkeys";
+import { highlightedLinesAtom } from "../store";
 import { codeAtom, isCodeExampleAtom, selectedLanguageAtom } from "../store/code";
+import { derivedFlashMessageAtom } from "../store/flash";
 import {
   THEMES,
   themeAtom,
@@ -18,12 +21,9 @@ import {
   themeLineNumbersAtom,
   unlockedThemesAtom,
 } from "../store/themes";
-import useHotkeys from "../../../../utils/useHotkeys";
-import HighlightedCode from "./HighlightedCode";
-import classNames from "classnames";
-import { derivedFlashMessageAtom } from "../store/flash";
-import { highlightedLinesAtom, showLineNumbersAtom } from "../store";
 import { LANGUAGES } from "../util/languages";
+import styles from "./Editor.module.css";
+import HighlightedCode from "./HighlightedCode";
 
 function indentText(text: string) {
   return text
@@ -63,11 +63,11 @@ function handleTab(textarea: HTMLTextAreaElement, shiftKey: boolean) {
     if (shiftKey) {
       // dedent
       const newStart = beforeStart.lastIndexOf("\n") + 1;
-      textarea.setSelectionRange(newStart, end);
-      document.execCommand("insertText", false, dedentText(original.slice(newStart, end)));
+      const newText = dedentText(original.slice(newStart, end));
+      textarea.setRangeText(newText, newStart, end);
     } else {
       // indent
-      document.execCommand("insertText", false, "  ");
+      textarea.setRangeText("  ", start, end, "end");
     }
   } else {
     // Text selected
@@ -77,7 +77,7 @@ function handleTab(textarea: HTMLTextAreaElement, shiftKey: boolean) {
     if (shiftKey) {
       // dedent
       const newText = dedentText(original.slice(newStart, end));
-      document.execCommand("insertText", false, newText);
+      textarea.setRangeText(newText, newStart, end);
 
       if (currentLine.startsWith("  ")) {
         textarea.setSelectionRange(start - 2, start - 2 + newText.length);
@@ -87,7 +87,7 @@ function handleTab(textarea: HTMLTextAreaElement, shiftKey: boolean) {
     } else {
       // indent
       const newText = indentText(original.slice(newStart, end));
-      document.execCommand("insertText", false, newText);
+      textarea.setRangeText(newText, newStart, end);
       textarea.setSelectionRange(start + 2, start + 2 + newText.length);
     }
   }
@@ -95,6 +95,7 @@ function handleTab(textarea: HTMLTextAreaElement, shiftKey: boolean) {
 
 function handleEnter(textarea: HTMLTextAreaElement) {
   const currentLine = getCurrentlySelectedLine(textarea);
+  const start = textarea.selectionStart;
 
   const currentIndentationMatch = currentLine.match(/^(\s+)/);
   let wantedIndentation = currentIndentationMatch ? currentIndentationMatch[0] : "";
@@ -103,9 +104,8 @@ function handleEnter(textarea: HTMLTextAreaElement) {
     wantedIndentation += "  ";
   }
 
-  document.execCommand("insertText", false, `\n${wantedIndentation}`);
+  textarea.setRangeText(`\n${wantedIndentation}`, start, start, "end");
 }
-
 function handleBracketClose(textarea: HTMLTextAreaElement) {
   const currentLine = getCurrentlySelectedLine(textarea);
   const { selectionStart, selectionEnd } = textarea;
@@ -114,7 +114,7 @@ function handleBracketClose(textarea: HTMLTextAreaElement) {
     textarea.setSelectionRange(selectionStart - 2, selectionEnd);
   }
 
-  document.execCommand("insertText", false, "}");
+  textarea.setRangeText("}", selectionStart, selectionEnd, "end");
 }
 
 function Editor() {

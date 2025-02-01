@@ -1,19 +1,24 @@
-import React, { MouseEventHandler, PropsWithChildren, useCallback, useRef, useState } from "react";
-import { useAtom } from "jotai";
-import { windowWidthAtom } from "../store";
 import classnames from "classnames";
+import { useAtom } from "jotai";
+import React, { MouseEventHandler, PropsWithChildren, useCallback, useRef, useState } from "react";
 import { CSSTransition } from "react-transition-group";
-
+import XMarkIcon from "../assets/icons/x-mark-circle-filled-16.svg";
+import { PatchFile } from "../lib/types";
+import { windowWidthAtom } from "../store";
+import { PatchFileCarousel } from "./PatchFileCarousel";
 import styles from "./ResizableFrame.module.css";
 
-import XMarkIcon from "../assets/icons/x-mark-circle-filled-16.svg";
-
 type Handle = "right" | "left";
+
+interface ResizableFrameProps extends PropsWithChildren {
+  files: PatchFile[];
+  onChangeFile: (file: PatchFile, index: number) => void;
+}
 
 let maxWidth = 920;
 let minWidth = 520;
 
-const ResizableFrame: React.FC<PropsWithChildren> = ({ children }) => {
+const ResizableFrame: React.FC<ResizableFrameProps> = ({ children, files, onChangeFile }) => {
   const currentHandleRef = useRef<Handle>();
   const windowRef = useRef<HTMLDivElement>(null);
   const startWidthRef = useRef<number>();
@@ -41,7 +46,7 @@ const ResizableFrame: React.FC<PropsWithChildren> = ({ children }) => {
 
       setWindowWidth(newWidth);
     },
-    [setWindowWidth]
+    [setWindowWidth],
   );
 
   const clearSelection = useCallback(() => {
@@ -73,7 +78,7 @@ const ResizableFrame: React.FC<PropsWithChildren> = ({ children }) => {
         document.addEventListener("mousemove", mouseMoveHandler);
         document.addEventListener("mouseup", mouseUpHandler);
       },
-    [mouseMoveHandler, mouseUpHandler]
+    [mouseMoveHandler, mouseUpHandler],
   );
 
   return (
@@ -90,48 +95,57 @@ const ResizableFrame: React.FC<PropsWithChildren> = ({ children }) => {
         {children}
       </div>
 
-      <CSSTransition
-        nodeRef={resetWindowWidthRef}
-        in={!!(windowWidth && !isResizing)}
-        unmountOnExit
-        timeout={200}
-        classNames={{
-          enter: styles.fadeEnter,
-          enterActive: styles.fadeEnterActive,
-          exit: styles.fadeExit,
-          exitActive: styles.fadeExitActive,
-        }}
-      >
-        <div className={styles.resetWidthContainer} ref={resetWindowWidthRef}>
-          <a
-            className={styles.resetWidth}
-            onClick={(event) => {
-              event.preventDefault();
-              setWindowWidth(null);
+      {!!windowWidth && (
+        <PatchFileCarousel
+          className="flex w-full mt-[1em]"
+          files={files}
+          onChangeFile={onChangeFile}
+          showButtons={files && files.length !== 0 && !isResizing}
+        >
+          <CSSTransition
+            nodeRef={resetWindowWidthRef}
+            in={!!(windowWidth && !isResizing)}
+            unmountOnExit
+            timeout={200}
+            classNames={{
+              enter: styles.fadeEnter,
+              enterActive: styles.fadeEnterActive,
+              exit: styles.fadeExit,
+              exitActive: styles.fadeExitActive,
             }}
           >
-            <XMarkIcon />
-            Set to auto width
-          </a>
-        </div>
-      </CSSTransition>
+            <div className={styles.resetWidthContainer} ref={resetWindowWidthRef}>
+              <a
+                className={styles.resetWidth}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setWindowWidth(null);
+                }}
+              >
+                <XMarkIcon />
+                Set to auto width
+              </a>
+            </div>
+          </CSSTransition>
 
-      <CSSTransition
-        nodeRef={rulerRef}
-        in={isResizing}
-        unmountOnExit
-        timeout={200}
-        classNames={{
-          enter: styles.fadeEnter,
-          enterActive: styles.fadeEnterActive,
-          exit: styles.fadeExit,
-          exitActive: styles.fadeExitActive,
-        }}
-      >
-        <div ref={rulerRef} className={styles.ruler}>
-          <span>{windowWidth} px</span>
-        </div>
-      </CSSTransition>
+          <CSSTransition
+            nodeRef={rulerRef}
+            in={isResizing}
+            unmountOnExit
+            timeout={200}
+            classNames={{
+              enter: styles.fadeEnter,
+              enterActive: styles.fadeEnterActive,
+              exit: styles.fadeExit,
+              exitActive: styles.fadeExitActive,
+            }}
+          >
+            <div ref={rulerRef} className={styles.ruler}>
+              <span>{windowWidth} px</span>
+            </div>
+          </CSSTransition>
+        </PatchFileCarousel>
+      )}
     </div>
   );
 };
