@@ -95,7 +95,7 @@ const ResizableFrame: React.FC<ResizableFrameProps> = ({ children, files, onChan
         {children}
       </div>
 
-      {!!windowWidth && (
+      {(!!(windowWidth && !isResizing) || isResizing || (files && files.length !== 0)) && (
         <FileCarousel
           className="flex w-full mt-[1em]"
           files={files}

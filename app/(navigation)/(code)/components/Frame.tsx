@@ -5,7 +5,7 @@ import clerkPattern from "../assets/clerk/pattern.svg?url";
 import mintlifyPatternDark from "../assets/mintlify-pattern-dark.svg?url";
 import mintlifyPatternLight from "../assets/mintlify-pattern-light.svg?url";
 import beams from "../assets/tailwind/beams.png";
-import { usePatchFiles } from "../hooks/useFiles";
+import { File } from "../lib/types";
 import { fileNameAtom, showBackgroundAtom } from "../store";
 import { codeAtom, selectedLanguageAtom } from "../store/code";
 import { FrameContext } from "../store/FrameContextStore";
@@ -302,12 +302,15 @@ const DefaultFrame = () => {
 interface FrameProps {
   resize?: boolean;
   code?: string;
+  patchFiles: File[];
+  currentPatch?: File | null;
+  handleFilesSelected?: (files: File[]) => void;
+  handleChangeFile: (file: File) => void;
 }
 
-const Frame = ({ resize = true, code }: FrameProps) => {
+const Frame = ({ resize = true, code, patchFiles, handleChangeFile }: FrameProps) => {
   const frameContext = useContext(FrameContext);
   const setCode = useSetAtom(codeAtom);
-  const { patchFiles, handleChangeFile } = usePatchFiles();
 
   useEffect(() => {
     if (code) setCode(code);

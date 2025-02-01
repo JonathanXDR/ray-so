@@ -327,7 +327,7 @@ export function Code() {
 
         <div className={styles.app}>
           <NoSSR>
-            {highlighter && <Frame />}
+            {highlighter && <Frame patchFiles={patchFiles} handleChangeFile={handleChangeFile} />}
             <Controls />
           </NoSSR>
         </div>
