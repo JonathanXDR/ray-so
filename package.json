@@ -40,6 +40,7 @@
     "diff": "^7.0.0",
     "dub": "0.30.4",
     "geist": "^1.3.0",
+    "gitdiff-parser": "^0.3.1",
     "glob": "^10.4.1",
     "highlight.js": "^11.7.0",
     "hotkeys-js": "^3.10.0",
