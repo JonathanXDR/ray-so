@@ -12,14 +12,14 @@ export function Instructions() {
         <Cursor />
       </div>
 
-      <h3 className={styles.title}>Install AI Commands</h3>
+      <h3 className={styles.title}>Download diffs</h3>
       <p className={styles.description}>
-        Select a prompt by clicking on it. Hold <kbd data-variant="small">⌘</kbd> to select multiple. Click{" "}
-        <strong>Add to Raycast</strong> to import them directly.
+        Select a file by clicking on it. Hold <kbd data-variant="small">⌘</kbd> to select multiple. Click{" "}
+        <strong>Export images</strong> to download them directly.
       </p>
 
       <Button variant="primary" disabled>
-        Add to Raycast
+        Export images
       </Button>
     </div>
   );

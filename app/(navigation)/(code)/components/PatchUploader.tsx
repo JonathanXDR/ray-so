@@ -8,11 +8,8 @@ import { PatchFile } from "../lib/types";
 
 export default function PatchUploader({
   onFilesSelected,
+  ...props
 }: {
-  /**
-   * A callback invoked after the patch is processed.
-   * Returns an array of PatchFile { fileName, code }.
-   */
   onFilesSelected: (files: PatchFile[]) => void;
 }) {
   const [uploading, setUploading] = useState(false);
@@ -37,29 +34,18 @@ export default function PatchUploader({
         throw new Error(errData.error || "Error uploading patch");
       }
 
-      // Suppose your /api/diff endpoint returns something like:
-      // {
-      //   results: [
-      //     { fileName: "foo.js", base64Image?: string, code: "diff..." },
-      //     ...
-      //   ]
-      // }
       const data = await res.json();
       if (!data.results) {
         toast.error("No changed files found");
         return;
       }
 
-      // Convert server result into our PatchFile[] shape
       const patchFiles = data.results.map((resItem: any) => ({
         fileName: resItem.fileName,
-        code: resItem.code || "", // or diff lines, etc.
+        code: resItem.code || "",
       })) as PatchFile[];
 
-      // Expose the patch files to parent
       onFilesSelected(patchFiles);
-
-      // Show just the filenames in this UI
       setFileNames(patchFiles.map((pf) => pf.fileName));
     } catch (error: any) {
       console.error("Error uploading .patch:", error);
@@ -70,7 +56,7 @@ export default function PatchUploader({
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 mb-3" {...props}>
       <Button size="large" title="Upload your own SVG" className="relative" disabled={uploading}>
         <input
           type="file"
@@ -92,14 +78,6 @@ export default function PatchUploader({
           </>
         )}
       </Button>
-
-      <ul className="flex flex-col text-sm gap-1">
-        {fileNames.map((name) => (
-          <li key={name} className="border-l-2 border-gray-5 pl-2">
-            {name}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

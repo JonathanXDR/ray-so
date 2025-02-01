@@ -15,7 +15,6 @@ import useIsSafari from "../util/useIsSafari";
 import Editor from "./Editor";
 import FlashMessage from "./FlashMessage";
 import styles from "./Frame.module.css";
-import PatchUploader from "./PatchUploader";
 import ResizableFrame from "./ResizableFrame";
 
 const VercelFrame = () => {
@@ -308,7 +307,7 @@ interface FrameProps {
 const Frame = ({ resize = true, code }: FrameProps) => {
   const frameContext = useContext(FrameContext);
   const setCode = useSetAtom(codeAtom);
-  const { patchFiles, currentPatch, handleFilesSelected, handleChangeFile } = usePatchFiles();
+  const { patchFiles, handleChangeFile } = usePatchFiles();
 
   useEffect(() => {
     if (code) setCode(code);
@@ -346,10 +345,6 @@ const Frame = ({ resize = true, code }: FrameProps) => {
           {renderFrame()}
         </div>
       </ResizableFrame>
-
-      <div className={styles.patchUploader}>
-        <PatchUploader onFilesSelected={handleFilesSelected} />
-      </div>
     </div>
   );
 };

@@ -1,17 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
-import { useSectionInView, useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
-import SelectionArea, { SelectionEvent } from "@viselect/react";
-import { Category, Quicklink, categories as originalCategories } from "../quicklinks";
-import { extractQuicklinks } from "../utils/extractQuicklinks";
-import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
-import copy from "copy-to-clipboard";
-import { isTouchDevice } from "../utils/isTouchDevice";
-import styles from "./quicklinks.module.css";
-import { ButtonGroup } from "@/components/button-group";
+import { getRaycastFlavor } from "@/app/RaycastFlavor";
 import { Button } from "@/components/button";
+import { ButtonGroup } from "@/components/button-group";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/dropdown-menu";
+import { Input, InputSlot } from "@/components/input";
+import { Kbd, Kbds } from "@/components/kbd";
+import { NavigationActions } from "@/components/navigation";
+import { ScrollArea } from "@/components/scroll-area";
+import { toast } from "@/components/toast";
+import { shortenUrl } from "@/utils/common";
+import { useSectionInView, useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
+import * as Collapsible from "@radix-ui/react-collapsible";
 import {
   ChevronDownIcon,
   CopyClipboardIcon,
@@ -22,18 +22,17 @@ import {
   StarsIcon,
   TrashIcon,
 } from "@raycast/icons";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/dropdown-menu";
-import { ScrollArea } from "@/components/scroll-area";
-import { Instructions } from "../components/Instructions";
-import * as Collapsible from "@radix-ui/react-collapsible";
-import { NavigationActions } from "@/components/navigation";
-import { Kbd, Kbds } from "@/components/kbd";
+import { SelectionEvent } from "@viselect/react";
+import copy from "copy-to-clipboard";
+import { useRouter } from "next/navigation";
+import React, { useEffect } from "react";
 import { InfoDialog } from "../components/InfoDialog";
-import { QuicklinkComponent } from "../components/quicklink";
-import { shortenUrl } from "@/utils/common";
-import { toast } from "@/components/toast";
-import { Input, InputSlot } from "@/components/input";
-import { getRaycastFlavor } from "@/app/RaycastFlavor";
+import { Instructions } from "../components/Instructions";
+import { Category, Quicklink, categories as originalCategories } from "../quicklinks";
+import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
+import { extractQuicklinks } from "../utils/extractQuicklinks";
+import { isTouchDevice } from "../utils/isTouchDevice";
+import styles from "./quicklinks.module.css";
 
 export function Quicklinks() {
   const [enableViewObserver, setEnableViewObserver] = React.useState(false);
@@ -346,82 +345,7 @@ export function Quicklinks() {
           </div>
         </div>
 
-        <div className={styles.container}>
-          {isTouch !== null && (
-            <SelectionArea
-              className="pt-8"
-              onStart={onStart}
-              onMove={onMove}
-              selectables=".selectable"
-              features={{
-                touch: false,
-                range: !isTouch,
-                singleTap: {
-                  allow: true,
-                  intersect: "native",
-                },
-              }}
-            >
-              {filteredQuicklinks.length === 0 && (
-                <div className="flex justify-center flex-col items-center py-[180px] gap-4">
-                  <LinkIcon className="w-6 h-6 text-gray-10" />
-                  <p className="text-gray-12 font-medium text-sm text-center ">No Quicklinks found</p>
-                  <Button variant="secondary" onClick={() => setSearch("")}>
-                    Clear search
-                  </Button>
-                </div>
-              )}
-              {categories
-                .filter((c) => {
-                  if (!search) return true;
-                  return c.quicklinks.some((q) => q.name.toLowerCase().includes(search.toLowerCase()));
-                })
-                .map((category) => {
-                  return (
-                    <div
-                      key={category.name}
-                      data-section-slug={`/quicklinks${category.slug}`}
-                      style={{
-                        outline: "none",
-                      }}
-                      tabIndex={-1}
-                    >
-                      <h2 className={styles.subtitle}>
-                        <category.iconComponent /> {category.name}
-                      </h2>
-                      <div className={styles.prompts}>
-                        {category.quicklinks
-                          .filter((q) => {
-                            if (!search) return true;
-                            return q.name.toLowerCase().includes(search.toLowerCase());
-                          })
-                          .map((quicklink, index) => {
-                            const isSelected = selectedQuicklinkIds.includes(quicklink.id);
-                            const setIsSelected = (value: boolean) => {
-                              if (isSelected) {
-                                return setSelectedQuicklinkIds((prevQuicklinkIds) =>
-                                  prevQuicklinkIds.filter((prevQuicklinkId) => prevQuicklinkId !== quicklink.id),
-                                );
-                              }
-                              setSelectedQuicklinkIds((prevQuicklinkIds) => [...prevQuicklinkIds, quicklink.id]);
-                            };
-                            return (
-                              <QuicklinkComponent
-                                key={quicklink.id}
-                                quicklink={quicklink}
-                                updateQuicklink={updateQuicklink}
-                                isSelected={isSelected}
-                                setIsSelected={setIsSelected}
-                              />
-                            );
-                          })}
-                      </div>
-                    </div>
-                  );
-                })}
-            </SelectionArea>
-          )}
-        </div>
+        {/* Main content here */}
       </div>
     </div>
   );
