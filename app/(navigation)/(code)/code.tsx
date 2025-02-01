@@ -108,68 +108,78 @@ export function Code() {
         <div className={styles.sidebar}>
           <div className={styles.sidebarInner}>
             <ScrollArea>
-              <div className={styles.sidebarContent}>
+              <div
+                className={`${styles.sidebarContent} ${!currentPatch?.fileName.endsWith(".patch") ? "justify-between" : ""}`}
+              >
                 <div className={styles.sidebarNav}>
-                  <PatchUploader onFilesSelected={handleFilesSelected} />
-                  <Input
-                    type="search"
-                    placeholder="Search files…"
-                    variant="soft"
-                    className="mb-6 flex"
-                    size="large"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  >
-                    <InputSlot side="left">
-                      <MagnifyingGlassIcon className="w-3.5 h-3.5" />
-                    </InputSlot>
-                  </Input>
+                  <div className="flex gap-3">
+                    <Input
+                      type="search"
+                      placeholder="Search files…"
+                      variant="soft"
+                      className="mb-6 flex"
+                      size="large"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    >
+                      <InputSlot side="left">
+                        <MagnifyingGlassIcon className="w-3.5 h-3.5" />
+                      </InputSlot>
+                    </Input>
+                    <PatchUploader onFilesSelected={handleFilesSelected} />
+                  </div>
 
                   {filteredFiles.length ? <p className={styles.sidebarTitle}>Files</p> : null}
 
-                  {filteredFiles.map((file) => {
-                    return (
-                      <NavItem
-                        key={file.fileName}
-                        file={file}
-                        isActive={selectedFileNames.includes(file.fileName)}
-                        onSelect={(e) => {
-                          e.preventDefault();
+                  <div className="max-h-[500px] overflow-y-auto">
+                    {filteredFiles.map((file) => {
+                      return (
+                        <NavItem
+                          key={file.fileName}
+                          file={file}
+                          isActive={selectedFileNames.includes(file.fileName)}
+                          onSelect={(e) => {
+                            e.preventDefault();
 
-                          setSelectedFileNames((prev) => {
-                            return prev.includes(file.fileName)
-                              ? prev.filter((f) => f !== file.fileName)
-                              : [...prev, file.fileName];
-                          });
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-
-                <span className={styles.sidebarNavDivider}></span>
-
-                <div className={styles.sidebarNav}>
-                  <div className={styles.filter}>
-                    <span className={styles.label}>
-                      <label htmlFor="inlineDiff">Highlight inline diff</label>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info01Icon />
-                        </TooltipTrigger>
-                        <TooltipContent>If enabled, inline diff will be highlighted in the code</TooltipContent>
-                      </Tooltip>
-                    </span>
-                    <Switch
-                      id="inlineDiff"
-                      checked={highlightInlineDiff}
-                      onCheckedChange={(checked) => setHighlightInlineDiff(checked)}
-                      color="purple"
-                    />
+                            setSelectedFileNames((prev) => {
+                              return prev.includes(file.fileName)
+                                ? prev.filter((f) => f !== file.fileName)
+                                : [...prev, file.fileName];
+                            });
+                          }}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
 
-                {!selectedFileNames.length && <Instructions />}
+                {currentPatch && currentPatch.fileName.endsWith(".patch") && (
+                  <>
+                    <span className={styles.sidebarNavDivider}></span>
+
+                    <div className={styles.sidebarNav}>
+                      <div className={styles.filter}>
+                        <span className={styles.label}>
+                          <label htmlFor="inlineDiff">Highlight inline diff</label>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info01Icon />
+                            </TooltipTrigger>
+                            <TooltipContent>If enabled, inline diff will be highlighted in the code</TooltipContent>
+                          </Tooltip>
+                        </span>
+                        <Switch
+                          id="inlineDiff"
+                          checked={highlightInlineDiff}
+                          onCheckedChange={(checked) => setHighlightInlineDiff(checked)}
+                          color="purple"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {!(selectedFileNames.length > 1) && <Instructions />}
 
                 {selectedFileNames.length > 1 && (
                   <div>
@@ -201,9 +211,7 @@ export function Code() {
                     </Collapsible.Root>
 
                     <div className={styles.summaryControls}>
-                      <Button onClick={() => console.log("Export images")} variant="primary">
-                        Export images
-                      </Button>
+                      <ExportButton />
 
                       <Button onClick={() => setSelectedFileNames([])}>Clear selected</Button>
                     </div>

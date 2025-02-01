@@ -57,7 +57,7 @@ export default function PatchUploader({
 
   return (
     <div className="flex flex-col gap-3 mb-3" {...props}>
-      <Button size="large" title="Upload your own SVG" className="relative" disabled={uploading}>
+      <Button iconOnly size="large" title="Upload your own SVG" className="relative" disabled={uploading}>
         <input
           type="file"
           className="absolute top-0 right-0 bottom-0 left-0 cursor-pointer opacity-0"
@@ -68,13 +68,13 @@ export default function PatchUploader({
         {!uploading && (
           <>
             <UploadIcon className="!w-4 !h-4" />
-            Upload Patch
+            {/* Upload */}
           </>
         )}
         {uploading && (
           <>
             <CircleProgressIcon className="animate-spin" />
-            Uploading...
+            {/* Uploading... */}
           </>
         )}
       </Button>
