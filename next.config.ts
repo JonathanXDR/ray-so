@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
   transpilePackages: ["geist", "highlight.js"],
   experimental: {
     optimizePackageImports: ["shiki"],
+    turbo: {
+      rules: {
+        "*.svg": {
+          loaders: ["@svgr/webpack"],
+          as: "*.js",
+        },
+      },
+    },
   },
   webpack(config) {
     // Grab the existing rule that handles SVG imports
