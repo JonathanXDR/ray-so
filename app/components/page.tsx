@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/button";
 import { ButtonGroup } from "@/components/button-group";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/dialog";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -17,8 +18,22 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/dropdown-menu";
+import { Input, InputSlot } from "@/components/input";
+import { Kbd, Kbds, Shortcut } from "@/components/kbd";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectItemText,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/select";
 import { Switch } from "@/components/switch";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/tooltip";
+import { toast } from "@/components/toast";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import {
   BrandCplusplusIcon,
   BrandJavascriptIcon,
@@ -30,21 +45,6 @@ import {
   PlusCircleIcon,
   RaycastLogoNegIcon,
 } from "@raycast/icons";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/dialog";
-import { Kbd, Kbds, Shortcut } from "@/components/kbd";
-import { Input, InputSlot } from "@/components/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-  SelectItemText,
-  SelectGroup,
-  SelectLabel,
-  SelectSeparator,
-} from "@/components/select";
-import { toast } from "@/components/toast";
 
 export default function Components() {
   return (

@@ -1,7 +1,7 @@
-import { atom } from "jotai";
-import { Base64 } from "js-base64";
 import hljs from "highlight.js";
+import { atom } from "jotai";
 import { atomWithHash } from "jotai-location";
+import { Base64 } from "js-base64";
 import { LANGUAGES, Language } from "../util/languages";
 
 type CodeSample = {

@@ -1,14 +1,12 @@
 "use client";
 
-import { Prompt } from "../prompts";
-import React from "react";
-import { nanoid } from "nanoid";
+import { Button } from "@/components/button";
+import { ButtonGroup } from "@/components/button-group";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/dropdown-menu";
+import { Kbd, Kbds } from "@/components/kbd";
+import { NavigationActions } from "@/components/navigation";
+import { ScrollArea } from "@/components/scroll-area";
 import * as ContextMenu from "@radix-ui/react-context-menu";
-import { notFound, useRouter, useSearchParams } from "next/navigation";
-import SelectionArea, { SelectionEvent } from "@viselect/react";
-import copy from "copy-to-clipboard";
-
-import { isTouchDevice } from "../utils/isTouchDevice";
 import {
   ChevronDownIcon,
   CopyClipboardIcon,
@@ -19,26 +17,18 @@ import {
   PlusCircleIcon,
   StarsIcon,
 } from "@raycast/icons";
-import { extractPrompts } from "../utils/extractPrompts";
-import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
-
+import { SelectionArea, SelectionEvent } from "@viselect/react";
+import copy from "copy-to-clipboard";
+import { useRouter } from "next/navigation";
+import React from "react";
 import styles from "../[[...slug]]/prompts.module.css";
-import { ScrollArea } from "@/components/scroll-area";
 import CreativityIcon from "../components/CreativityIcon";
-import { ButtonGroup } from "@/components/button-group";
-import { Button } from "@/components/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/dropdown-menu";
-import { Toast, ToastTitle } from "../components/Toast";
-import { Metadata } from "next";
-import { NavigationActions } from "@/components/navigation";
 import { InfoDialog } from "../components/InfoDialog";
-import { Kbd, Kbds } from "@/components/kbd";
+import { Toast, ToastTitle } from "../components/Toast";
+import { Prompt } from "../prompts";
+import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
+import { extractPrompts } from "../utils/extractPrompts";
+import { isTouchDevice } from "../utils/isTouchDevice";
 
 export function Shared({ prompts }: { prompts: Prompt[] }) {
   const router = useRouter();
@@ -49,7 +39,7 @@ export function Shared({ prompts }: { prompts: Prompt[] }) {
   const [selectedPrompts, setSelectedPrompts] = React.useState([...prompts]);
   const isTouch = React.useMemo(() => (typeof window !== "undefined" ? isTouchDevice() : false), []);
 
-  const [isClient, setIsClient] = React.useState(false);
+  const [, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
     setIsClient(true);

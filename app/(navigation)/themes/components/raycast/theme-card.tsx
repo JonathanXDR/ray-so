@@ -24,13 +24,14 @@ export function ThemeCard({ theme: raycastTheme }: { theme?: Theme }) {
   return (
     <button
       ref={ref}
-      className={`snap-always snap-center flex flex-col ring-1 ring-inset p-4 gap-3 rounded-2xl overflow-hidden h-full aspect-[1.58/1] shrink-0 outline-none transition-shadow ${
+      className={`snap-always snap-center flex flex-col ring-1 ring-inset p-4 gap-3 rounded-2xl overflow-hidden h-full aspect-[1.58/1] shrink-0 outline-hidden transition-shadow ${
         isActiveTheme
           ? "ring-black/60 dark:ring-white/60 shadow-[0px_0px_29px_10px_rgba(0,0,0,0.06)] dark:shadow-[0px_0px_29px_10px_rgba(255,255,255,.06)]"
-          : "ring-[rgba(0,0,0,0.2)] dark:ring-[rgba(255,255,255,0.2)] focus:ring-[rgba(0,0,0,0.4)] focus:dark:ring-[rgba(255,255,255,0.4)]"
+          : "ring-[rgba(0,0,0,0.2)] dark:ring-[rgba(255,255,255,0.2)] focus:ring-[rgba(0,0,0,0.4)] dark:focus:ring-[rgba(255,255,255,0.4)]"
       }`}
       onClick={() => {
-        raycastTheme ? setActiveTheme(raycastTheme) : {};
+        if (!raycastTheme) return;
+        setActiveTheme(raycastTheme);
       }}
     >
       <div className="overflow-hidden rounded-md flex-1 w-full">

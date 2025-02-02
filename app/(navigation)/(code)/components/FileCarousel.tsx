@@ -33,7 +33,7 @@ export function FileCarousel({
           disabled={files.length <= 1}
           title="Previous file"
         >
-          <ChevronLeftIcon className="!w-4 !h-4" />
+          <ChevronLeftIcon className="w-4! h-4!" />
         </Button>
       )}
 
@@ -47,7 +47,7 @@ export function FileCarousel({
           disabled={files.length <= 1}
           title="Next file"
         >
-          <ChevronRightIcon className="!w-4 !h-4" />
+          <ChevronRightIcon className="w-4! h-4!" />
         </Button>
       )}
     </div>

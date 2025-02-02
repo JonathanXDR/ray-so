@@ -1,17 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import cn from "classnames";
-
-import { PlusIcon, TrashIcon } from "@raycast/icons";
-import { toPng as htmlToPng } from "html-to-image";
-
-import styles from "./ExportModal.module.css";
-import { Select, SelectItem, SelectContent, SelectItemText, SelectValue, SelectTrigger } from "@/components/select";
 import { Button } from "@/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/dialog";
 import { Input, InputSlot } from "@/components/input";
+import { Select, SelectContent, SelectItem, SelectItemText, SelectTrigger, SelectValue } from "@/components/select";
+import { PlusIcon, TrashIcon } from "@raycast/icons";
+import cn from "classnames";
+import { toPng as htmlToPng } from "html-to-image";
+import React, { useState } from "react";
 import download from "../../(code)/util/download";
+import styles from "./ExportModal.module.css";
 
 type ExportFormat = "PNG" | "SVG";
 
@@ -28,7 +26,7 @@ const exportToPng = async (svgRef: SvgRefType, fileName: string, size: number) =
     return;
   }
 
-  let dataUrl = await htmlToPng(svgRef.current, { pixelRatio: 1, quality: 1, width: size, height: size });
+  const dataUrl = await htmlToPng(svgRef.current, { pixelRatio: 1, quality: 1, width: size, height: size });
   setTimeout(() => {
     download(dataUrl, `${fileName}.png`);
   }, 100);

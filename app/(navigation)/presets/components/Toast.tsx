@@ -1,27 +1,26 @@
 "use client";
 
-import React from "react";
 import * as ToastPrimitive from "@radix-ui/react-toast";
-
+import React from "react";
 import styles from "./Toast.module.css";
 
 type ToastPrimitiveRootProps = React.ComponentProps<typeof ToastPrimitive.Root>;
 
-export const Toast = React.forwardRef<React.ElementRef<typeof ToastPrimitive.Root>, ToastPrimitiveRootProps>(
+export const Toast = React.forwardRef<React.ComponentRef<typeof ToastPrimitive.Root>, ToastPrimitiveRootProps>(
   ({ children, ...props }, forwardedRef) => {
     return (
       <ToastPrimitive.Root {...props} className={styles.root} ref={forwardedRef}>
         {children}
       </ToastPrimitive.Root>
     );
-  }
+  },
 );
 Toast.displayName = "Toast";
 
 type ToastPrimitiveViewportProps = React.ComponentProps<typeof ToastPrimitive.Viewport>;
 
 export const ToastViewport = React.forwardRef<
-  React.ElementRef<typeof ToastPrimitive.Viewport>,
+  React.ComponentRef<typeof ToastPrimitive.Viewport>,
   ToastPrimitiveViewportProps
 >((props, forwardedRef) => {
   return <ToastPrimitive.Viewport {...props} className={styles.viewport} ref={forwardedRef} />;
@@ -29,7 +28,7 @@ export const ToastViewport = React.forwardRef<
 ToastViewport.displayName = "ToastViewport";
 
 export const ToastTitle = React.forwardRef<
-  React.ElementRef<typeof ToastPrimitive.Title>,
+  React.ComponentRef<typeof ToastPrimitive.Title>,
   React.ComponentProps<typeof ToastPrimitive.Title>
 >((props, forwardedRef) => {
   return <ToastPrimitive.Title {...props} className={styles.title} ref={forwardedRef} />;

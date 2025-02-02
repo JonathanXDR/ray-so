@@ -1,62 +1,53 @@
 "use client";
 
-import React, { use, useCallback, useEffect, useRef, useState } from "react";
-
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import cn from "classnames";
-import { toPng as htmlToPng } from "html-to-image";
-import { CSSTransition } from "react-transition-group";
-import { ColorChangeHandler, SketchPicker } from "react-color";
-import * as Popover from "@radix-ui/react-popover";
-
-import DropZoneIndicator from "./assets/drop-zone-indicator.svg";
-
-import {
-  Icons,
-  IconName,
-  UndoIcon,
-  RedoIcon,
-  ArrowRightIcon,
-  DownloadIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-  ShuffleIcon,
-  FolderIcon,
-  ImageIcon,
-  AppWindowSidebarLeftIcon as AppImageSidebarLeftIcon,
-  AppWindowSidebarRightIcon as AppImageSidebarRightIcon,
-  CopyClipboardIcon,
-  LinkIcon,
-  BrushIcon,
-  MagnifyingGlassIcon,
-} from "@raycast/icons";
-
-import ResultIcon from "./components/ResultIcon";
 import { Button } from "@/components/button";
-import CustomSvgIcon from "./components/CustomSvgIcon";
-
-import { randomElement, debounce, uniq, randomNumberBetween, getPastedSvgFile } from "./lib/utils";
-
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/select";
-
-import ExportModal from "./components/ExportModal";
-
-import styles from "./icon-generator.module.css";
-
-import type { SettingsType } from "./lib/types";
-import { BASE_URL } from "@/utils/common";
 import { ButtonGroup } from "@/components/button-group";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/dropdown-menu";
-import usePngClipboardSupported from "../(code)/util/usePngClipboardSupported";
-import { Switch } from "@/components/switch";
-import { NavigationActions } from "@/components/navigation";
-import useHotkeys from "@/utils/useHotkeys";
 import { Input, InputSlot } from "@/components/input";
-import { SelectItemText } from "@radix-ui/react-select";
-import { InfoDialog } from "./components/InfoDialog";
 import { Kbd, Kbds } from "@/components/kbd";
+import { NavigationActions } from "@/components/navigation";
 import { ScrollArea } from "@/components/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/select";
+import { Switch } from "@/components/switch";
+import { BASE_URL } from "@/utils/common";
+import useHotkeys from "@/utils/useHotkeys";
+import * as Popover from "@radix-ui/react-popover";
+import { SelectItemText } from "@radix-ui/react-select";
+import {
+  AppWindowSidebarLeftIcon as AppImageSidebarLeftIcon,
+  AppWindowSidebarRightIcon as AppImageSidebarRightIcon,
+  ArrowRightIcon,
+  BrushIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  CopyClipboardIcon,
+  DownloadIcon,
+  FolderIcon,
+  IconName,
+  Icons,
+  ImageIcon,
+  LinkIcon,
+  MagnifyingGlassIcon,
+  RedoIcon,
+  ShuffleIcon,
+  UndoIcon,
+} from "@raycast/icons";
+import cn from "classnames";
+import { toPng as htmlToPng } from "html-to-image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { ColorChangeHandler, SketchPicker } from "react-color";
+import { CSSTransition } from "react-transition-group";
+import usePngClipboardSupported from "../(code)/util/usePngClipboardSupported";
+import DropZoneIndicator from "./assets/drop-zone-indicator.svg";
+import CustomSvgIcon from "./components/CustomSvgIcon";
+import ExportModal from "./components/ExportModal";
+import { InfoDialog } from "./components/InfoDialog";
+import ResultIcon from "./components/ResultIcon";
+import styles from "./icon-generator.module.css";
+import type { SettingsType } from "./lib/types";
+import { debounce, getPastedSvgFile, randomElement, randomNumberBetween, uniq } from "./lib/utils";
 
 const scales = [0.25, 0.5, 1, 2];
 
@@ -288,7 +279,6 @@ export const IconGenerator = () => {
   const [recentColors, setRecentColors] = useState<string[]>([]);
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
   const [panelsVisible, setPanelsVisible] = useState<boolean>(false);
-  const [headerVisible, setHeaderVisible] = useState<boolean>(true);
   const [infoMessage, setInfoMessage] = useState<string>();
   const [infoMessageVisible, setInfoMessageVisible] = useState<boolean>(false);
   const [showInfoMessageUndoButton, setShowInfoMessageUndoButton] = useState<boolean>(true);
@@ -545,8 +535,14 @@ export const IconGenerator = () => {
   useHotkeys("ctrl+z,cmd+z", () => undo());
   useHotkeys("ctrl+shift+z,cmd+shift+z", () => redo());
   useHotkeys("ctrl+shift+e,cmd+shift+e", () => setShowExportModal(true));
-  useHotkeys("ctrl+shift+c,cmd+shift+c", () => onCopyShareUrl() as any);
-  useHotkeys("ctrl+c,cmd+c", () => onCopyImageToClipboard() as any);
+  useHotkeys("ctrl+shift+c,cmd+shift+c", () => {
+    void onCopyShareUrl();
+    return false;
+  });
+  useHotkeys("ctrl+c,cmd+c", () => {
+    void onCopyImageToClipboard();
+    return false;
+  });
   useHotkeys("ctrl+f,cmd+f", (e) => {
     if (searchRef && searchRef.current) {
       e.preventDefault();
@@ -754,12 +750,15 @@ export const IconGenerator = () => {
 
   const onShare = async () => {
     try {
-      const url = window.location.href.split("?")[0] + "?" + new URLSearchParams(settings as any).toString();
+      const url =
+        window.location.href.split("?")[0] +
+        "?" +
+        new URLSearchParams(Object.entries(settings).map(([key, value]) => [key, String(value)])).toString();
       await navigator.share({
         title: "Raycast Icon",
         url,
       });
-    } catch (err) {
+    } catch {
       console.error("sharing not available");
     }
   };
@@ -771,7 +770,7 @@ export const IconGenerator = () => {
         onOpenChange={setShowExportModal}
         onStartExport={() => showInfoMessage("Download started", false)}
         fileName={settings.fileName}
-        svgRef={svgRef}
+        svgRef={svgRef as React.RefObject<HTMLElement & SVGSVGElement>}
       />
       <CSSTransition
         in={draggingFile}
@@ -913,11 +912,11 @@ export const IconGenerator = () => {
                 onChange={onChangeSearchTerm}
               >
                 <InputSlot side="left">
-                  <MagnifyingGlassIcon className="!w-4 !h-4" />
+                  <MagnifyingGlassIcon className="w-4! h-4!" />
                 </InputSlot>
               </Input>
               <Button iconOnly size="large" onClick={onRandomIconClick} title="Random icon">
-                <ShuffleIcon className="!w-4 !h-4" />
+                <ShuffleIcon className="w-4! h-4!" />
               </Button>
               <Button iconOnly size="large" title="Upload your own SVG" className="relative">
                 <input
@@ -926,7 +925,7 @@ export const IconGenerator = () => {
                   onChange={onSelectCustomIcon}
                   accept=".svg, .png"
                 />
-                <FolderIcon className="!w-4 !h-4" />
+                <FolderIcon className="w-4! h-4!" />
               </Button>
             </div>
             {filteredIcons.length === 0 ? (
@@ -1174,7 +1173,7 @@ export const IconGenerator = () => {
                         <Switch
                           name="backgroundRadialGlare"
                           checked={settings.backgroundRadialGlare}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={(checked: boolean) =>
                             pushNewSettings({
                               backgroundRadialGlare: checked,
                             })
@@ -1188,7 +1187,7 @@ export const IconGenerator = () => {
                         <Switch
                           name="backgroundNoiseTexture"
                           checked={settings.backgroundNoiseTexture}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={(checked: boolean) =>
                             pushNewSettings({
                               backgroundNoiseTexture: checked,
                             })

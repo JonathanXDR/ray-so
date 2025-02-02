@@ -1,10 +1,10 @@
 import { cn } from "@/utils/cn";
 import { VariantProps, cva } from "class-variance-authority";
-import React, { Children, InputHTMLAttributes } from "react";
+import React, { InputHTMLAttributes } from "react";
 
 const inputVariants = cva(
   `inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-normal transition-colors duration-100 overflow-hidden
-  focus-visible:outline-none focus-visible:ring-1
+  focus-visible:outline-hidden focus-visible:ring-1
   disabled:pointer-events-none disabled:opacity-50`,
   {
     variants: {
@@ -22,7 +22,7 @@ const inputVariants = cva(
       variant: "classic",
       size: "medium",
     },
-  }
+  },
 );
 
 export interface InputProps
@@ -33,11 +33,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, variant, size, children, ...props }, ref) => {
     return (
       <label className={cn(inputVariants({ variant, size, className }))}>
-        <input ref={ref} className="outline-none w-full bg-transparent text-inherit" {...props} />
+        <input ref={ref} className="outline-hidden w-full bg-transparent text-inherit" {...props} />
         {children}
       </label>
     );
-  }
+  },
 );
 Input.displayName = "Input";
 
@@ -52,7 +52,7 @@ const InputSlot = React.forwardRef<HTMLDivElement, SlotProps>(({ className, side
         "shrink-0 text-gray-a10",
         side === "right" && "-order-none",
         side === "left" && "-order-1",
-        className
+        className,
       )}
       ref={ref}
       {...props}
@@ -62,4 +62,4 @@ const InputSlot = React.forwardRef<HTMLDivElement, SlotProps>(({ className, side
 
 InputSlot.displayName = "InputSlot";
 
-export { Input, inputVariants, InputSlot };
+export { Input, InputSlot, inputVariants };

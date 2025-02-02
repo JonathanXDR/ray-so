@@ -1,8 +1,7 @@
 "use client";
-import React from "react";
+import { useRaycastTheme } from "@themes/components/raycast-theme-provider";
 import { ThemeCard } from "@themes/components/raycast/theme-card";
 import { Theme } from "@themes/lib/theme";
-import { useRaycastTheme } from "@themes/components/raycast-theme-provider";
 
 export function ThemeSwitcher({ themes }: { themes: Theme[] }) {
   const { activeTheme } = useRaycastTheme();

@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import Presets from "./presets";
 import { getAvailableAiModels } from "@/api/ai";
+import type { Metadata } from "next";
 import OgImage from "../assets/og-image.png";
+import Presets from "./presets";
 
 const pageTitle = "Preset Explorer by Raycast";
 const pageDescription = "Easily browse, share, and add presets to Raycast.";

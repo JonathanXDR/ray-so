@@ -1,16 +1,14 @@
-import { useAtom } from "jotai";
-import React, { useState } from "react";
-import { autoDetectLanguageAtom, selectedLanguageAtom } from "../store/code";
-import ControlContainer from "./ControlContainer";
-import { Language, LANGUAGES } from "../util/languages";
-
-import styles from "./LanguageControl.module.css";
-
-import useHotkeys from "../../../../utils/useHotkeys";
-import { loadingLanguageAtom } from "../store";
 import { Select, SelectContent, SelectItem, SelectItemText, SelectTrigger, SelectValue } from "@/components/select";
 import { cn } from "@/utils/cn";
 import { ChevronUpIcon } from "@raycast/icons";
+import { useAtom } from "jotai";
+import React, { useState } from "react";
+import useHotkeys from "../../../../utils/useHotkeys";
+import { loadingLanguageAtom } from "../store";
+import { autoDetectLanguageAtom, selectedLanguageAtom } from "../store/code";
+import { Language, LANGUAGES } from "../util/languages";
+import ControlContainer from "./ControlContainer";
+import styles from "./LanguageControl.module.css";
 
 const LanguageControl: React.FC = () => {
   const [isOpen, setOpen] = useState(false);

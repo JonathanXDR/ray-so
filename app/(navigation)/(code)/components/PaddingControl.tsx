@@ -1,12 +1,10 @@
-import React from "react";
-import { useAtom } from "jotai";
-import classNames from "classnames";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
-
+import { useAtom } from "jotai";
+import React from "react";
+import useHotkeys from "../../../../utils/useHotkeys";
+import { isPadding, PADDING_OPTIONS, paddingAtom } from "../store/padding";
 import ControlContainer from "./ControlContainer";
 import styles from "./PaddingControl.module.css";
-import { isPadding, Padding, paddingAtom, PADDING_OPTIONS } from "../store/padding";
-import useHotkeys from "../../../../utils/useHotkeys";
 
 const PaddingControl: React.FC = () => {
   const [padding, setPadding] = useAtom(paddingAtom);

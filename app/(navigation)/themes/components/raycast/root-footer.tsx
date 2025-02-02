@@ -2,16 +2,16 @@ import { RaycastLogoNegIcon, RaycastLogoPosIcon } from "@raycast/icons";
 
 export function RootFooter({ mode = "dark" }: { mode?: "dark" | "light" }) {
   return (
-    <footer className="shrink-0 h-[40px] px-3 border-t border-[--text-100] flex items-center justify-between gap-2 z-10 bg-white/20 dark:bg-white/5">
-      <div className="flex gap-3 items-center text-sm text-[--text-600]">
+    <footer className="shrink-0 h-[40px] px-3 border-t border-(--text-100) flex items-center justify-between gap-2 z-10 bg-white/20 dark:bg-white/5">
+      <div className="flex gap-3 items-center text-sm text-(--text-600)">
         {mode === "dark" ? <RaycastLogoNegIcon className="w-5 h-5" /> : <RaycastLogoPosIcon className="w-5 h-5" />}
         <div>Theme Explorer</div>
       </div>
 
       <div className="flex gap-3 items-center">
         <div className="flex gap-3 items-center">
-          <div className="text-xs text-[--text] font-semibold">Open Command</div>
-          <div className="w-[24px] h-[24px] rounded-md flex items-center justify-center bg-[--text-100] text-[--text]">
+          <div className="text-xs text-(--text) font-semibold">Open Command</div>
+          <div className="w-[24px] h-[24px] rounded-md flex items-center justify-center bg-(--text-100) text-(--text)">
             <svg
               width="12"
               height="9"
@@ -27,13 +27,13 @@ export function RootFooter({ mode = "dark" }: { mode?: "dark" | "light" }) {
             </svg>
           </div>
         </div>
-        <div className="w-[2px] h-[12px] bg-[--text-100]" />
+        <div className="w-[2px] h-[12px] bg-(--text-100)" />
         <div className="flex gap-3 items-center">
-          <div className="text-xs font-semibold text-[--text-600]">Actions</div>
-          <div className="w-[24px] h-[24px] rounded-md flex items-center justify-center text-xs bg-[--text-100] text-[--text]">
+          <div className="text-xs font-semibold text-(--text-600)">Actions</div>
+          <div className="w-[24px] h-[24px] rounded-md flex items-center justify-center text-xs bg-(--text-100) text-(--text)">
             ⌘
           </div>
-          <div className="w-[24px] h-[24px] rounded-md flex items-center justify-center text-xs bg-[--text-100] text-[--text] -ml-2">
+          <div className="w-[24px] h-[24px] rounded-md flex items-center justify-center text-xs bg-(--text-100) text-(--text) -ml-2">
             K
           </div>
         </div>

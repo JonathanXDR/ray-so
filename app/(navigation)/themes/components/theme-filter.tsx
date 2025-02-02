@@ -1,9 +1,9 @@
 "use client";
-import React from "react";
-import { Theme } from "@themes/lib/theme";
+import { MoonIcon, SunIcon } from "@raycast/icons";
 import { useLastVisitedTheme } from "@themes/components/navigation-history";
 import { useRaycastTheme } from "@themes/components/raycast-theme-provider";
-import { MoonIcon, SunIcon } from "@raycast/icons";
+import { Theme } from "@themes/lib/theme";
+import React from "react";
 
 export function ThemeFilter({ themes }: { themes: Theme[] }) {
   const { activeTheme, setActiveTheme } = useRaycastTheme();
@@ -72,26 +72,26 @@ type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   className?: string;
 };
 
-const ModeLink = React.forwardRef<HTMLAnchorElement, LinkProps>(({ children, className, ...props }, ref) => (
+const ModeLink = React.forwardRef<HTMLAnchorElement, LinkProps>(({ children, ...props }, ref) => (
   <a
     {...props}
     ref={ref}
-    className={`h-[30px] flex items-center gap-2 px-4 outline-none text-sm font-medium ring-1 ring-inset ring-transparent rounded-full
+    className={`h-[30px] flex items-center gap-2 px-4 outline-hidden text-sm font-medium ring-1 ring-inset ring-transparent rounded-full
 
       text-black/60
-      data-[active]:text-black
+      data-active:text-black
       
       dark:text-white/60
-      dark:data-[active]:text-white
+      dark:data-active:text-white
 
-      data-[active]:ring-[#737373]
+      data-active:ring-[#737373]
       focus:ring-[#737373]
-      data-[active]:bg-[rgba(0,0,0,0.1)]
-      data-[active]:shadow-[0px_0px_29px_10px_rgba(0,_0,_0,_0.06)]
+      data-active:bg-[rgba(0,0,0,0.1)]
+      data-active:shadow-[0px_0px_29px_10px_rgba(0,0,0,0.06)]
       
 
-      dark:data-[active]:bg-[rgba(255,255,255,0.1)]
-      dark:data-[active]:shadow-[0px_0px_29px_10px_rgba(255,_255,_255,_0.06)]
+      dark:data-active:bg-[rgba(255,255,255,0.1)]
+      dark:data-active:shadow-[0px_0px_29px_10px_rgba(255,255,255,0.06)]
       
       `}
   >

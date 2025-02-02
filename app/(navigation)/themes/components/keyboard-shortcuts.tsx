@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
-
 import { Button } from "@/components/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/dialog";
 import { Shortcut } from "@/components/kbd";
-import { KeyboardIcon } from "@raycast/icons";
 import useHotkeys from "@/utils/useHotkeys";
+import { KeyboardIcon } from "@raycast/icons";
+import { useCallback, useState } from "react";
 
 export default function KeyboardShortcuts() {
   const [isOpen, setIsOpen] = useState(false);

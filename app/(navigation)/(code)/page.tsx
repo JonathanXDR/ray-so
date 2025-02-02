@@ -1,8 +1,7 @@
+import { BASE_URL } from "@/utils/common";
 import type { Metadata } from "next";
-
 import OgPhoto from "./assets/og.png";
 import { Code } from "./code";
-import { BASE_URL } from "@/utils/common";
 
 const title = "Create beautiful images of your code";
 const description =

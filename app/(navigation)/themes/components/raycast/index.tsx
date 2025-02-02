@@ -1,11 +1,11 @@
 "use client";
-import { List } from "@themes/components/raycast/list";
+import { useRaycastTheme } from "@themes/components/raycast-theme-provider";
 import { Grid } from "@themes/components/raycast/grid";
+import { List } from "@themes/components/raycast/list";
 import { RootFooter } from "@themes/components/raycast/root-footer";
 import { RootHeader } from "@themes/components/raycast/root-header";
-import { useRaycastTheme } from "@themes/components/raycast-theme-provider";
-import { Theme } from "@themes/lib/theme";
 import { alpha } from "@themes/lib/alpha";
+import { Theme } from "@themes/lib/theme";
 
 export function Raycast({
   theme: forcedTheme,

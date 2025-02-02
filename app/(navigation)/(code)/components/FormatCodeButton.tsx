@@ -1,14 +1,14 @@
 "use client";
 
-import { WandIcon } from "@raycast/icons";
-import formatCode, { formatterSupportedLanguages } from "../util/formatCode";
-import { useAtom } from "jotai";
-import { codeAtom, selectedLanguageAtom } from "../store/code";
-import useHotkeys from "@/utils/useHotkeys";
 import { Button } from "@/components/button";
 import { toast } from "@/components/toast";
 import { cn } from "@/utils/cn";
+import useHotkeys from "@/utils/useHotkeys";
+import { WandIcon } from "@raycast/icons";
+import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
+import { codeAtom, selectedLanguageAtom } from "../store/code";
+import formatCode, { formatterSupportedLanguages } from "../util/formatCode";
 
 const FormatButton: React.FC = () => {
   const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
@@ -42,7 +42,7 @@ const FormatButton: React.FC = () => {
           return (
             <div className="space-y-2 overflow-hidden">
               <p className="font-medium">Code formatting failed</p>
-              <pre className="w-full overflow-auto text-xs scrollbar-hide bg-gray-a3 p-2.5 rounded">
+              <pre className="w-full overflow-auto text-xs scrollbar-hide bg-gray-a3 p-2.5 rounded-sm">
                 <code className="w-full">{data.message}</code>
               </pre>
             </div>

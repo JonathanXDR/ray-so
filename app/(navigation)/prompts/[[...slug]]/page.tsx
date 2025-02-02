@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import { getAvailableAiModels } from "@/api/ai";
-import { Prompts } from "./prompts";
+import type { Metadata } from "next";
 import OgImage from "../assets/og-image.png";
+import { Prompts } from "./prompts";
 
 const pageTitle = "Prompt Explorer by Raycast";
 const pageDescription = "Easily browse, share, and add prompts to Raycast.";

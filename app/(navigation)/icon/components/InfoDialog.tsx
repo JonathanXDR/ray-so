@@ -1,10 +1,10 @@
 import { Button } from "@/components/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/dialog";
-import { Info02Icon } from "@raycast/icons";
 import { Shortcut } from "@/components/kbd";
-import { useCallback, useState } from "react";
-import useHotkeys from "@/utils/useHotkeys";
 import { SocialFooter } from "@/components/social-footer";
+import useHotkeys from "@/utils/useHotkeys";
+import { Info02Icon } from "@raycast/icons";
+import { useCallback, useState } from "react";
 
 export function InfoDialog() {
   const [isOpen, setIsOpen] = useState(false);

@@ -1,8 +1,23 @@
-import { readFile } from "fs";
-import { basename, join } from "path";
-import { glob } from "glob";
-import { promisify } from "util";
 import { BASE_URL } from "@/utils/common";
+import { readFile } from "fs";
+import { glob } from "glob";
+import { basename, join } from "path";
+import { promisify } from "util";
+
+type ThemeColors = {
+  background: string;
+  backgroundSecondary: string;
+  text: string;
+  selection: string;
+  loader: string;
+  red: string;
+  orange: string;
+  yellow: string;
+  green: string;
+  blue: string;
+  purple: string;
+  magenta: string;
+};
 
 export type Theme = {
   author: string;
@@ -11,20 +26,7 @@ export type Theme = {
   name: string;
   slug?: string;
   appearance: "light" | "dark";
-  colors: {
-    background: string;
-    backgroundSecondary: string;
-    text: string;
-    selection: string;
-    loader: string;
-    red: string;
-    orange: string;
-    yellow: string;
-    green: string;
-    blue: string;
-    purple: string;
-    magenta: string;
-  };
+  colors: ThemeColors;
 };
 
 const themesDir = join(process.cwd(), "app", "(navigation)", "themes", "themes");
@@ -49,7 +51,7 @@ export async function getAllThemes(): Promise<Theme[]> {
       const slug = `${parentDirName}/${fileName.replace(".json", "")}`.toLowerCase();
 
       return { ...themeData, slug, og_image: `${BASE_URL}/themes-og/${slug.replace("/", "_")}.png` };
-    })
+    }),
   );
 
   return themes;
@@ -57,13 +59,14 @@ export async function getAllThemes(): Promise<Theme[]> {
 
 // This function checks whether the query params generated from Raycast's Theme Studio
 // can be converted into a Theme object that is used in this App
-function canConvertParamsToTheme(params: any): boolean {
+
+function canConvertParamsToTheme(params: Theme): boolean {
   const { appearance, name, version, colors } = params;
-  return appearance && name && version && colors;
+  return Boolean(appearance && name && version && colors);
 }
 
 function convertLegacyColorIfNeeded(color: string) {
-  const [hex, value] = color.split("#");
+  const [, value] = color.split("#");
   if (value.length === 8) {
     return `#${value.slice(0, -2)}`;
   }
@@ -72,10 +75,13 @@ function convertLegacyColorIfNeeded(color: string) {
 
 // This function converts the query params generated from Raycast's Theme Studio
 // into a Theme object that is used in this App
-export function makeThemeObjectFromParams(params: any): Theme | undefined {
+export function makeThemeObjectFromParams(params: Theme & { colors: string | ThemeColors }): Theme | undefined {
   if (canConvertParamsToTheme(params)) {
     const { appearance, name, author, authorUsername, version, colors: colorString } = params;
 
+    if (typeof colorString !== "string") {
+      return undefined;
+    }
     const colorArray = colorString.split(",");
 
     const colorObject = {

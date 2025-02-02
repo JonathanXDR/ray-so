@@ -1,7 +1,10 @@
-import * as ContextMenu from "@radix-ui/react-context-menu";
-import { categories, type Quicklink } from "../quicklinks";
-import { IconComponent } from "./IconComponent";
+import { Button } from "@/components/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/dialog";
+import { Input } from "@/components/input";
+import { toast } from "@/components/toast";
+import { cn } from "@/utils/cn";
+import { shortenUrl } from "@/utils/common";
+import * as ContextMenu from "@radix-ui/react-context-menu";
 import {
   CopyClipboardIcon,
   LinkIcon,
@@ -10,17 +13,14 @@ import {
   PlusCircleIcon,
   RaycastLogoNegIcon,
 } from "@raycast/icons";
-import { Input } from "@/components/input";
-import { Button } from "@/components/button";
-import { toast } from "@/components/toast";
-import styles from "./quicklink.module.css";
-import { cn } from "@/utils/cn";
-import React from "react";
 import copy from "copy-to-clipboard";
-import { makeUrl, addQuicklinkToRaycast } from "../utils/actions";
-
-import { shortenUrl } from "@/utils/common";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import React from "react";
+import { type Quicklink } from "../quicklinks";
+import { addQuicklinkToRaycast, makeUrl } from "../utils/actions";
+import { IconComponent } from "./IconComponent";
+import styles from "./quicklink.module.css";
 
 type QuicklinkComponentProps = {
   quicklink: Quicklink;
@@ -99,18 +99,18 @@ export function QuicklinkComponent({ quicklink, isSelected, setIsSelected, updat
         >
           <div className="w-full flex flex-col space-between h-full">
             <div className="flex-1">
-              <div className="flex w-8 h-8 flex-shrink-0 items-center justify-center border border-dashed border-white/20 rounded bg-gradient-radial from-[#171717] to-black text-gray-12 transition-colors duration-150 mb-2 group-hover:text-gray-12">
+              <div className="flex w-8 h-8 shrink-0 items-center justify-center border border-dashed border-white/20 rounded-sm bg-gradient-radial from-[#171717] to-black text-gray-12 transition-colors duration-150 mb-2 group-hover:text-gray-12">
                 {quicklink?.icon?.name ||
                 (!quicklink.link.startsWith("http") && !quicklink?.icon?.link?.startsWith("http")) ? (
                   <IconComponent icon={quicklink?.icon?.name || "link"} />
                 ) : (
-                  <img
+                  <Image
                     src={`https://api.ray.so/favicon?url=%5C${domain}&size=64`}
                     alt="logo"
                     width={16}
                     height={16}
                     className={cn(
-                      `grayscale rounded overflow-hidden contrast-150 group-hover:grayscale-0`,
+                      `grayscale rounded-sm overflow-hidden contrast-150 group-hover:grayscale-0`,
                       quicklink?.icon?.invert && "invert",
                     )}
                   />
@@ -156,7 +156,7 @@ export function QuicklinkComponent({ quicklink, isSelected, setIsSelected, updat
                     quicklink.isEdited
                       ? "text-purple"
                       : "opacity-0 group-hover:opacity-100 group-hover/footer:text-white",
-                    "rounded-sm w-4 h-4 flex items-center justify-center shrink-0 -mr-2 transition-colors duration-150",
+                    "rounded-xs w-4 h-4 flex items-center justify-center shrink-0 -mr-2 transition-colors duration-150",
                   )}
                 >
                   <PencilIcon className="w-3" />

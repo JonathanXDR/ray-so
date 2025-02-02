@@ -1,11 +1,11 @@
 "use client";
-import React from "react";
-import copy from "copy-to-clipboard";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ChevronDownIcon, PlusCircleIcon, PlusIcon } from "@raycast/icons";
+import { ChevronDownIcon, PlusCircleIcon } from "@raycast/icons";
 import { useRaycastTheme } from "@themes/components/raycast-theme-provider";
 import { isTouchDevice } from "@themes/lib/isTouchDevice";
 import { makeRaycastImportUrl } from "@themes/lib/url";
+import copy from "copy-to-clipboard";
+import React from "react";
 
 export function AddToRaycast() {
   const [isTouch, setIsTouch] = React.useState<boolean | null>(null);
@@ -14,7 +14,7 @@ export function AddToRaycast() {
 
   const handleCopyTheme = React.useCallback(() => {
     if (!activeTheme) return;
-    const { slug, ...theme } = activeTheme;
+    const { ...theme } = activeTheme;
     copy(JSON.stringify(theme, null, 2));
   }, [activeTheme]);
 
@@ -42,7 +42,7 @@ export function AddToRaycast() {
 
   const handleDownload = React.useCallback(() => {
     if (!activeTheme) return;
-    const { slug, ...theme } = activeTheme;
+    const { ...theme } = activeTheme;
     const encodedThemeData = encodeURIComponent(JSON.stringify(theme, null, 2));
     const jsonString = `data:text/json;chatset=utf-8,${encodedThemeData}`;
     const link = document.createElement("a");
@@ -147,7 +147,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ children, cla
   <button
     {...rest}
     ref={ref}
-    className={`h-[30px] flex items-center gap-2 px-4 outline-none
+    className={`h-[30px] flex items-center gap-2 px-4 outline-hidden
         bg-white/10
         dark:bg-black/10
         hover:bg-white/50 
@@ -167,9 +167,9 @@ Button.displayName = "Button";
 function Item({ children, onSelect }: { children: React.ReactNode; onSelect: () => void }) {
   return (
     <DropdownMenu.Item
-      className="flex justify-between gap-3 rounded pl-2 pr-1 py-1 outline-none 
-      data-[highlighted]:bg-black/10 
-      dark:data-[highlighted]:bg-white/10 
+      className="flex justify-between gap-3 rounded pl-2 pr-1 py-1 outline-hidden 
+      data-highlighted:bg-black/10 
+      dark:data-highlighted:bg-white/10 
       
       cursor-default"
       onSelect={onSelect}
@@ -185,7 +185,7 @@ function Shortcut({ keys }: { keys: string[] }) {
       {keys.map((key) => (
         <kbd
           key={key}
-          className="bg-black/10 dark:bg-white/10 text-sm text-black dark:text-white/60 h-[20px] w-[24px] rounded items-center justify-center flex font-medium"
+          className="bg-black/10 dark:bg-white/10 text-sm text-black dark:text-white/60 h-[20px] w-[24px] rounded-sm items-center justify-center flex font-medium"
         >
           {key}
         </kbd>

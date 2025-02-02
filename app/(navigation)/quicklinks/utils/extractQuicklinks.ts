@@ -1,6 +1,6 @@
 import { Quicklink } from "../quicklinks";
 
-export function extractQuicklinks<T>(els: Element[], categories: { slug: string; quicklinks: Quicklink[] }[]) {
+export function extractQuicklinks(els: Element[], categories: { slug: string; quicklinks: Quicklink[] }[]) {
   const ids = els.map((v) => v.getAttribute("data-key"));
 
   const quicklinks = ids

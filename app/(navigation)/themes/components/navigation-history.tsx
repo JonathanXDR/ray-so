@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
 import { Theme } from "@themes/lib/theme";
+import React from "react";
 
 type LastVisitedThemeContextType = {
   previousActiveTheme: Theme | undefined;

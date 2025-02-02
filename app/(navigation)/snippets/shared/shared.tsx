@@ -1,31 +1,28 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import SelectionArea, { SelectionEvent } from "@viselect/react";
-import { useRouter } from "next/navigation";
-import copy from "copy-to-clipboard";
-import { nanoid } from "nanoid";
-import { SnippetsIcon } from "../components/Icons";
+import { Button } from "@/components/button";
+import { ButtonGroup } from "@/components/button-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/dropdown-menu";
-import { Toast, ToastTitle } from "../components/Toast";
-import { ScrollArea } from "@/components/scroll-area";
-import { Button } from "@/components/button";
-import { isTouchDevice } from "../utils/isTouchDevice";
-import styles from "../[[...slug]]/snippets.module.css";
-import buttonStyles from "../components/Button.module.css";
-import { ChevronDownIcon, CopyClipboardIcon, DownloadIcon, PlusCircleIcon } from "@raycast/icons";
-import { extractSnippets } from "../utils/extractSnippets";
-import { Snippet } from "../snippets";
-import { ButtonGroup } from "@/components/button-group";
-import { InfoDialog } from "../components/InfoDialog";
 import { Kbd, Kbds } from "@/components/kbd";
+import { ScrollArea } from "@/components/scroll-area";
+import { ChevronDownIcon, CopyClipboardIcon, DownloadIcon, PlusCircleIcon } from "@raycast/icons";
+import { SelectionArea, SelectionEvent } from "@viselect/react";
+import copy from "copy-to-clipboard";
+import { useRouter } from "next/navigation";
+import React from "react";
+import styles from "../[[...slug]]/snippets.module.css";
+import { SnippetsIcon } from "../components/Icons";
+import { InfoDialog } from "../components/InfoDialog";
+import { Toast, ToastTitle } from "../components/Toast";
+import { Snippet } from "../snippets";
+import { extractSnippets } from "../utils/extractSnippets";
+import { isTouchDevice } from "../utils/isTouchDevice";
 
 const raycastProtocolForEnvironments = {
   development: "raycastinternal",

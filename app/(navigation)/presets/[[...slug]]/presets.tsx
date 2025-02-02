@@ -1,21 +1,20 @@
 "use client";
 
-import React from "react";
+import { AiModel } from "@/api/ai";
+import { Button } from "@/components/button";
+import { ButtonGroup } from "@/components/button-group";
+import { NavigationActions } from "@/components/navigation";
+import { ScrollArea } from "@/components/scroll-area";
+import { Switch } from "@/components/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import { cn } from "@/utils/cn";
 import { useSectionInView, useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
-
-import styles from "./presets.module.css";
-import { ScrollArea } from "@/components/scroll-area";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import { ChevronDownIcon, Info01Icon, LinkIcon, PlusCircleIcon, StarsIcon } from "@raycast/icons";
+import React from "react";
+import { InfoDialog } from "../components/InfoDialog";
 import { PresetComponent } from "../components/Preset";
 import { Category, categories } from "../presets";
-import { Switch } from "@/components/switch";
-import { NavigationActions } from "@/components/navigation";
-import { ButtonGroup } from "@/components/button-group";
-import { Button } from "@/components/button";
-import { InfoDialog } from "../components/InfoDialog";
-import { AiModel } from "@/api/ai";
+import styles from "./presets.module.css";
 
 type Props = {
   models: AiModel[];

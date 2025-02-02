@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { Quicklinks } from "./quicklinks";
 import OgImage from "../assets/og-image.png";
+import { Quicklinks } from "./quicklinks";
 
 const pageTitle = "Quicklink Explorer by Raycast";
 const pageDescription = "Easily browse, share, and add quicklinks to Raycast.";

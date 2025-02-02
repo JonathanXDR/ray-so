@@ -1,17 +1,15 @@
-import React from "react";
-import { redirect } from "next/navigation";
-import { Raycast } from "@themes/components/raycast";
-import { getAllThemes } from "@themes/lib/theme";
+import { BASE_URL } from "@/utils/common";
 import { Desktop } from "@themes/components/desktop";
 import { PageWithThemeMode } from "@themes/components/page-with-theme-mode";
+import { Raycast } from "@themes/components/raycast";
+import { getAllThemes } from "@themes/lib/theme";
 import { Metadata } from "next";
-import { BASE_URL } from "@/utils/common";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { theme: [author: string, theme: string] };
+export async function generateMetadata(props: {
+  params: Promise<{ theme: [author: string, theme: string] }>;
 }): Promise<Metadata> {
+  const params = await props.params;
   const [author, themeName] = params.theme;
 
   const slug = `${author}/${themeName}`;
@@ -53,7 +51,8 @@ export async function generateMetadata({
   };
 }
 
-export default async function ThemePage({ params }: { params: { theme: [author: string, theme: string] } }) {
+export default async function ThemePage(props: { params: Promise<{ theme: [author: string, theme: string] }> }) {
+  const params = await props.params;
   const [author, themeName] = params.theme;
   const slug = `${author}/${themeName}`;
   const themes = await getAllThemes();

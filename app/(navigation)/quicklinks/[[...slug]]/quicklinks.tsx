@@ -22,12 +22,13 @@ import {
   StarsIcon,
   TrashIcon,
 } from "@raycast/icons";
-import { SelectionEvent } from "@viselect/react";
+import { SelectionArea, SelectionEvent } from "@viselect/react";
 import copy from "copy-to-clipboard";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { InfoDialog } from "../components/InfoDialog";
 import { Instructions } from "../components/Instructions";
+import { QuicklinkComponent } from "../components/quicklink";
 import { Category, Quicklink, categories as originalCategories } from "../quicklinks";
 import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
 import { extractQuicklinks } from "../utils/extractQuicklinks";
@@ -311,7 +312,7 @@ export function Quicklinks() {
                       </Collapsible.Trigger>
 
                       <Collapsible.Content className={styles.summaryContent}>
-                        {selectedQuicklinks.map((quicklink, index) => (
+                        {selectedQuicklinks.map((quicklink) => (
                           <div key={quicklink.id} className={styles.summaryItem}>
                             {quicklink.name}
                             <button
@@ -345,7 +346,82 @@ export function Quicklinks() {
           </div>
         </div>
 
-        {/* Main content here */}
+        <div className={styles.container}>
+          {isTouch !== null && (
+            <SelectionArea
+              className="pt-8"
+              onStart={onStart}
+              onMove={onMove}
+              selectables=".selectable"
+              features={{
+                touch: false,
+                range: !isTouch,
+                singleTap: {
+                  allow: true,
+                  intersect: "native",
+                },
+              }}
+            >
+              {filteredQuicklinks.length === 0 && (
+                <div className="flex justify-center flex-col items-center py-[180px] gap-4">
+                  <LinkIcon className="w-6 h-6 text-gray-10" />
+                  <p className="text-gray-12 font-medium text-sm text-center ">No Quicklinks found</p>
+                  <Button variant="secondary" onClick={() => setSearch("")}>
+                    Clear search
+                  </Button>
+                </div>
+              )}
+              {categories
+                .filter((c) => {
+                  if (!search) return true;
+                  return c.quicklinks.some((q) => q.name.toLowerCase().includes(search.toLowerCase()));
+                })
+                .map((category) => {
+                  return (
+                    <div
+                      key={category.name}
+                      data-section-slug={`/quicklinks${category.slug}`}
+                      style={{
+                        outline: "none",
+                      }}
+                      tabIndex={-1}
+                    >
+                      <h2 className={styles.subtitle}>
+                        <category.iconComponent /> {category.name}
+                      </h2>
+                      <div className={styles.prompts}>
+                        {category.quicklinks
+                          .filter((q) => {
+                            if (!search) return true;
+                            return q.name.toLowerCase().includes(search.toLowerCase());
+                          })
+                          .map((quicklink) => {
+                            const isSelected = selectedQuicklinkIds.includes(quicklink.id);
+                            const setIsSelected = () => {
+                              if (isSelected) {
+                                return setSelectedQuicklinkIds((prevQuicklinkIds) =>
+                                  prevQuicklinkIds.filter((prevQuicklinkId) => prevQuicklinkId !== quicklink.id),
+                                );
+                              }
+                              setSelectedQuicklinkIds((prevQuicklinkIds) => [...prevQuicklinkIds, quicklink.id]);
+                            };
+                            return (
+                              <QuicklinkComponent
+                                key={quicklink.id}
+                                quicklink={quicklink}
+                                updateQuicklink={updateQuicklink}
+                                isSelected={isSelected}
+                                setIsSelected={setIsSelected}
+                              />
+                            );
+                          })}
+                      </div>
+                    </div>
+                  );
+                })}
+            </SelectionArea>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,15 @@
 "use client";
 import { useState } from "react";
 
+interface DiffResult {
+  content: string;
+  fileName: string;
+}
+
+interface DiffResponse {
+  results: DiffResult[];
+}
+
 export function useFiles() {
   const [files, setFiles] = useState<File[]>([]);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
@@ -23,7 +32,7 @@ export function useFiles() {
           }
           const data = await res.json();
 
-          const diffFiles: File[] = data.results.map((item: any) => {
+          const diffFiles: File[] = (data as DiffResponse).results.map((item: DiffResult) => {
             const blob = new Blob([item.content || ""], { type: "text/plain" });
             return new File([blob], item.fileName, { lastModified: Date.now() });
           });

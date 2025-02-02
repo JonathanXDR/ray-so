@@ -1,3 +1,4 @@
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import {
   CircleDisabledIcon,
   StackedBars1Icon,
@@ -6,9 +7,7 @@ import {
   StackedBars4Icon,
 } from "@raycast/icons";
 import { Prompt } from "../prompts";
-
 import styles from "./CreativityIcon.module.css";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 
 export default function CreativityIcon({ creativity }: { creativity: Prompt["creativity"] }) {
   let component = null;

@@ -1,14 +1,14 @@
-import { Analytics } from "@vercel/analytics/react";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import cn from "classnames";
-import { BASE_URL } from "@/utils/common";
-import { TooltipProvider } from "@/components/tooltip";
-import { Viewport } from "next";
-import { Log } from "./log";
 import { Toaster } from "@/components/toast";
-import { RaycastFlavor } from "./RaycastFlavor";
+import { TooltipProvider } from "@/components/tooltip";
+import { BASE_URL } from "@/utils/common";
+import { Analytics } from "@vercel/analytics/react";
+import cn from "classnames";
+import { Viewport } from "next";
+import { Inter } from "next/font/google";
 import { Suspense } from "react";
+import "./globals.css";
+import { Log } from "./log";
+import { RaycastFlavor } from "./RaycastFlavor";
 
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500"], display: "swap" });
 

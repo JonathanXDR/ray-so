@@ -5,16 +5,13 @@ import { NavigationActions } from "@/components/navigation";
 import { ScrollArea } from "@/components/scroll-area";
 import { Switch } from "@/components/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
-import { useSectionInView, useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
+import { useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { BlankDocumentIcon, ChevronDownIcon, Info01Icon, MagnifyingGlassIcon, TrashIcon } from "@raycast/icons";
-import { SelectionEvent } from "@viselect/react";
 import { useAtom } from "jotai";
-import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { getHighlighterCore, Highlighter } from "shiki";
-import getWasm from "shiki/wasm";
-import * as uuid from "uuid";
+import { createHighlighterCore, Highlighter } from "shiki";
+import { createOnigurumaEngine } from "shiki/engine/oniguruma";
 import tailwindDark from "./assets/tailwind/dark.json";
 import tailwindLight from "./assets/tailwind/light.json";
 import styles from "./code.module.css";
@@ -33,20 +30,20 @@ import { shikiTheme } from "./store/themes";
 import { isTouchDevice } from "./util/isTouchDevice";
 import { LANGUAGES } from "./util/languages";
 
-function extractFiles(elements: Element[], files: File[]): File[] {
-  const result: File[] = [];
-  for (const el of elements) {
-    const fileName = el.getAttribute("data-file-name");
-    if (!fileName) continue;
-    const found = files.find((f) => f.name === fileName);
-    if (found) result.push(found);
-  }
-  return result;
-}
+// function extractFiles(elements: Element[], files: File[]): File[] {
+//   const result: File[] = [];
+//   for (const el of elements) {
+//     const fileName = el.getAttribute("data-file-name");
+//     if (!fileName) continue;
+//     const found = files.find((f) => f.name === fileName);
+//     if (found) result.push(found);
+//   }
+//   return result;
+// }
 
 export function Code() {
   const [highlighter, setHighlighter] = useAtom(highlighterAtom);
-  const { files, currentFile, handleFilesSelected, handleChangeFile, removeFile, updateFile } = useFiles();
+  const { files, currentFile, handleFilesSelected, handleChangeFile } = useFiles();
 
   const [search, setSearch] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
@@ -66,57 +63,58 @@ export function Code() {
     setEnableViewObserver(true);
   }, []);
 
-  const onStart = ({ event, selection }: SelectionEvent) => {
-    if (!isTouch && !event?.ctrlKey && !event?.metaKey) {
-      selection.clearSelection();
-      setSelectedFiles([]);
-    }
-  };
+  // const onStart = ({ event, selection }: SelectionEvent) => {
+  //   if (!isTouch && !event?.ctrlKey && !event?.metaKey) {
+  //     selection.clearSelection();
+  //     setSelectedFiles([]);
+  //   }
+  // };
 
-  const onMove = ({
-    store: {
-      changed: { added, removed },
-    },
-  }: SelectionEvent) => {
-    const addedFiles = extractFiles(added, files);
-    const removedFiles = extractFiles(removed, files);
+  // const onMove = ({
+  //   store: {
+  //     changed: { added, removed },
+  //   },
+  // }: SelectionEvent) => {
+  //   const addedFiles = extractFiles(added, files);
+  //   const removedFiles = extractFiles(removed, files);
 
-    setSelectedFileIds((prevFileIds) => {
-      let fileIds = [...prevFileIds];
+  //   setSelectedFileIds((prevFileIds) => {
+  //     let fileIds = [...prevFileIds];
 
-      addedFiles.forEach((file) => {
-        if (!file) return;
-        const id = uuid.v4();
-        if (fileIds.includes(id)) return;
-        fileIds.push(id);
-      });
+  //     addedFiles.forEach((file) => {
+  //       if (!file) return;
+  //       const id = uuid.v4();
+  //       if (fileIds.includes(id)) return;
+  //       fileIds.push(id);
+  //     });
 
-      removedFiles.forEach((file) => {
-        const id = uuid.v4();
-        fileIds = fileIds.filter((s) => s !== id);
-      });
+  //     removedFiles.forEach((file) => {
+  //       const id = uuid.v4();
+  //       fileIds = fileIds.filter((s) => s !== id);
+  //     });
 
-      return fileIds;
-    });
-  };
+  //     return fileIds;
+  //   });
+  // };
 
   const [highlightInlineDiff, setHighlightInlineDiff] = useState(true);
 
   useEffect(() => {
-    getHighlighterCore({
+    createHighlighterCore({
       themes: [shikiTheme, tailwindLight, tailwindDark],
       langs: [LANGUAGES.javascript.src(), LANGUAGES.tsx.src(), LANGUAGES.swift.src(), LANGUAGES.python.src()],
-      loadWasm: getWasm,
+      engine: createOnigurumaEngine(() => import("shiki/wasm")),
     }).then((loaded) => {
       setHighlighter(loaded as Highlighter);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [selectedFileIds, setSelectedFileIds] = React.useState<string[]>([]);
+  // const [selectedFileIds, setSelectedFileIds] = React.useState<string[]>([]);
 
-  const router = useRouter();
+  // const router = useRouter();
 
-  const [actionsOpen, setActionsOpen] = React.useState(false);
+  // const [actionsOpen, setActionsOpen] = React.useState(false);
   const [isTouch, setIsTouch] = React.useState<boolean>();
 
   // const handleDownload = React.useCallback(() => {
@@ -272,7 +270,7 @@ export function Code() {
                         <Switch
                           id="inlineDiff"
                           checked={highlightInlineDiff}
-                          onCheckedChange={(checked) => setHighlightInlineDiff(checked)}
+                          onCheckedChange={(checked: boolean) => setHighlightInlineDiff(checked)}
                           color="purple"
                         />
                       </div>
@@ -343,7 +341,7 @@ function NavItem({
   isActive: boolean;
   onSelect: (e: React.MouseEvent<HTMLLIElement>) => void;
 }) {
-  const activeSection = useSectionInView();
+  // const activeSection = useSectionInView();
 
   return (
     <li onClick={onSelect} className={styles.sidebarNavItem} data-active={isActive} data-file-name={file.name}>

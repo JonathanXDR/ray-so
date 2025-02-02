@@ -1,27 +1,25 @@
 "use client";
 
-import { Quicklink } from "../quicklinks";
-import React, { useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import SelectionArea, { SelectionEvent } from "@viselect/react";
-import copy from "copy-to-clipboard";
-
-import { isTouchDevice } from "../utils/isTouchDevice";
-import { ChevronDownIcon, CopyClipboardIcon, DownloadIcon, LinkIcon, PlusCircleIcon } from "@raycast/icons";
-import { extractQuicklinks } from "../utils/extractQuicklinks";
-import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
-
-import styles from "../[[...slug]]/quicklinks.module.css";
-import { ButtonGroup } from "@/components/button-group";
+import { getRaycastFlavor } from "@/app/RaycastFlavor";
 import { Button } from "@/components/button";
+import { ButtonGroup } from "@/components/button-group";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/dropdown-menu";
-import { NavigationActions } from "@/components/navigation";
-import { InfoDialog } from "../components/InfoDialog";
 import { Kbd, Kbds } from "@/components/kbd";
-import { QuicklinkComponent } from "../components/quicklink";
+import { NavigationActions } from "@/components/navigation";
 import { toast } from "@/components/toast";
 import { shortenUrl } from "@/utils/common";
-import { getRaycastFlavor } from "@/app/RaycastFlavor";
+import { ChevronDownIcon, CopyClipboardIcon, DownloadIcon, LinkIcon, PlusCircleIcon } from "@raycast/icons";
+import { SelectionArea, SelectionEvent } from "@viselect/react";
+import copy from "copy-to-clipboard";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useMemo } from "react";
+import styles from "../[[...slug]]/quicklinks.module.css";
+import { InfoDialog } from "../components/InfoDialog";
+import { QuicklinkComponent } from "../components/quicklink";
+import { Quicklink } from "../quicklinks";
+import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
+import { extractQuicklinks } from "../utils/extractQuicklinks";
+import { isTouchDevice } from "../utils/isTouchDevice";
 
 export function Shared({ quicklinks }: { quicklinks: Quicklink[] }) {
   const router = useRouter();
@@ -260,9 +258,9 @@ export function Shared({ quicklinks }: { quicklinks: Quicklink[] }) {
                     <quicklinkGroup.icon /> {quicklinkGroup.name}
                   </h2>
                   <div className={styles.prompts}>
-                    {quicklinkGroup.quicklinks.map((quicklink, index) => {
+                    {quicklinkGroup.quicklinks.map((quicklink) => {
                       const isSelected = selectedQuicklinkIds.includes(quicklink.id);
-                      const setIsSelected = (value: boolean) => {
+                      const setIsSelected = () => {
                         if (isSelected) {
                           return setSelectedQuicklinkIds((prevQuicklinkIds) =>
                             prevQuicklinkIds.filter((prevQuicklinkId) => prevQuicklinkId !== quicklink.id),

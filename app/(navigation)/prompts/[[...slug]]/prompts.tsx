@@ -1,17 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React from "react";
-import { useSectionInView, useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
-import SelectionArea, { SelectionEvent } from "@viselect/react";
-import { Category, Prompt, categories } from "../prompts";
-import { extractPrompts } from "../utils/extractPrompts";
-import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
-import copy from "copy-to-clipboard";
-import { isTouchDevice } from "../utils/isTouchDevice";
-import styles from "./prompts.module.css";
-import { ButtonGroup } from "@/components/button-group";
+import { AiModel } from "@/api/ai";
 import { Button } from "@/components/button";
+import { ButtonGroup } from "@/components/button-group";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/dropdown-menu";
+import { Kbd, Kbds } from "@/components/kbd";
+import { NavigationActions } from "@/components/navigation";
+import { ScrollArea } from "@/components/scroll-area";
+import { useSectionInView, useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
+import * as Collapsible from "@radix-ui/react-collapsible";
+import * as ContextMenu from "@radix-ui/react-context-menu";
 import {
   ChevronDownIcon,
   CopyClipboardIcon,
@@ -22,17 +20,19 @@ import {
   StarsIcon,
   TrashIcon,
 } from "@raycast/icons";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/dropdown-menu";
-import { Toast, ToastTitle } from "../components/Toast";
-import { ScrollArea } from "@/components/scroll-area";
-import { Instructions } from "../components/Instructions";
-import * as Collapsible from "@radix-ui/react-collapsible";
-import * as ContextMenu from "@radix-ui/react-context-menu";
+import { SelectionArea, SelectionEvent } from "@viselect/react";
+import copy from "copy-to-clipboard";
+import { useRouter } from "next/navigation";
+import React from "react";
 import CreativityIcon from "../components/CreativityIcon";
-import { NavigationActions } from "@/components/navigation";
-import { Kbd, Kbds } from "@/components/kbd";
 import { InfoDialog } from "../components/InfoDialog";
-import { AiModel } from "@/api/ai";
+import { Instructions } from "../components/Instructions";
+import { Toast, ToastTitle } from "../components/Toast";
+import { Category, Prompt, categories } from "../prompts";
+import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
+import { extractPrompts } from "../utils/extractPrompts";
+import { isTouchDevice } from "../utils/isTouchDevice";
+import styles from "./prompts.module.css";
 
 type Props = {
   models: AiModel[];

@@ -1,16 +1,16 @@
 "use client";
 
-import React, { CSSProperties } from "react";
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import { cn } from "@/utils/cn";
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
+import React from "react";
 
 type ScrollAreaPrimitiveRootProps = React.ComponentProps<typeof ScrollAreaPrimitive.Root>;
 
 export const ScrollArea = React.forwardRef<
-  React.ElementRef<typeof ScrollAreaPrimitive.Root>,
+  React.ComponentRef<typeof ScrollAreaPrimitive.Root>,
   ScrollAreaPrimitiveRootProps
 >(({ children, className }, forwardedRef) => (
-  <ScrollAreaPrimitive.Root className={cn("overflow-hidden w-full h-full rounded", className)} ref={forwardedRef}>
+  <ScrollAreaPrimitive.Root className={cn("overflow-hidden w-full h-full rounded-sm", className)} ref={forwardedRef}>
     <ScrollAreaPrimitive.Viewport className="w-full h-full rounded-inherit">{children}</ScrollAreaPrimitive.Viewport>
     <ScrollAreaPrimitive.Scrollbar
       className="flex p-[3px] touch-none transition-colors duration-160 ease-out select-none w-[10px]"

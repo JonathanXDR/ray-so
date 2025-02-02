@@ -1,5 +1,4 @@
 import React, { PropsWithChildren } from "react";
-
 import styles from "./ControlContainer.module.css";
 
 type PropTypes = {

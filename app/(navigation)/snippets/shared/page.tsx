@@ -1,14 +1,12 @@
-import React from "react";
-import { notFound } from "next/navigation";
-import { Metadata } from "next";
 import { nanoid } from "nanoid";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Snippet } from "../snippets";
 import { Shared } from "./shared";
-import { BASE_URL } from "@/utils/common";
 
 type Props = {
-  params: { slug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 function parseURLSnippet(queryString?: string | string[]): Snippet[] {
@@ -28,7 +26,8 @@ function parseURLSnippet(queryString?: string | string[]): Snippet[] {
   }));
 }
 
-export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const searchParams = await props.searchParams;
   const snippets = parseURLSnippet(searchParams.snippet as string);
   if (!snippets) {
     notFound();
@@ -39,7 +38,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     const pageTitle = `${snippet.name} - Raycast Snippet`;
     const pageDescription = snippet.text;
     const ogImage = `/snippets/og?title=${encodeURIComponent(snippet.name)}&description=${encodeURIComponent(
-      pageDescription
+      pageDescription,
     )}`;
 
     return {
@@ -82,7 +81,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       snippets.length === 2 ? "snippet" : "snippets"
     }`;
     const ogImage = `/snippets/og?title=${encodeURIComponent(pageTitle)}&description=${encodeURIComponent(
-      ogImageDescription
+      ogImageDescription,
     )}`;
 
     return {
@@ -115,7 +114,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   }
 }
 
-export default async function Page({ params, searchParams }: Props) {
+export default async function Page(props: Props) {
+  const searchParams = await props.searchParams;
   const snippets = parseURLSnippet(searchParams.snippet as string);
 
   if (!snippets) {

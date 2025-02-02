@@ -19,8 +19,8 @@ export function uniq<T>(arr: T[]): T[] {
 let debounceTimer: NodeJS.Timeout | null = null;
 
 export const debounce =
-  (fn: Function, delay = 300) =>
-  (...args: any[]) => {
+  <T extends unknown[]>(fn: (...args: T) => void, delay = 300) =>
+  (...args: T) => {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }

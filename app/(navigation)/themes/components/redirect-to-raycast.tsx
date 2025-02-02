@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
 import { Theme } from "@themes/lib/theme";
 import { makeRaycastImportUrl } from "@themes/lib/url";
+import React from "react";
 
 export function RedirectToRaycast({ theme }: { theme: Theme }) {
   React.useEffect(() => {

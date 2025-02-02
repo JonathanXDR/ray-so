@@ -1,18 +1,18 @@
-import Link from "next/link";
-import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
-import styles from "./Preset.module.css";
-import { CopyClipboardIcon, DownloadIcon, Globe01Icon, ImageIcon, LinkIcon, PlusCircleIcon } from "@raycast/icons";
-import CreativityIcon from "./CreativityIcon";
-import ModelIcon from "./ModelIcon";
+import { AiModel } from "@/api/ai";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import * as ContextMenu from "@radix-ui/react-context-menu";
+import { CopyClipboardIcon, DownloadIcon, Globe01Icon, ImageIcon, LinkIcon, PlusCircleIcon } from "@raycast/icons";
 import copy from "copy-to-clipboard";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { Toast, ToastTitle, ToastViewport } from "./Toast";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
-import { IconComponent } from "./Icons";
 import { Preset } from "../presets";
-import { AiModel } from "@/api/ai";
+import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
+import CreativityIcon from "./CreativityIcon";
+import { IconComponent } from "./Icons";
+import ModelIcon from "./ModelIcon";
+import styles from "./Preset.module.css";
+import { Toast, ToastTitle } from "./Toast";
 
 export const creativity = {
   none: ["None", "No Creativity"],

@@ -1,7 +1,7 @@
-import { Fira_Code, IBM_Plex_Mono, JetBrains_Mono } from "next/font/google";
-import cn from "classnames";
 import { Navigation } from "@/components/navigation";
+import cn from "classnames";
 import { GeistMono } from "geist/font/mono";
+import { Fira_Code, IBM_Plex_Mono, JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import React from "react";
 

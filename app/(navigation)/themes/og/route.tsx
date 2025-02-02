@@ -3,8 +3,8 @@
 
 import { alpha } from "@themes/lib/alpha";
 import { Theme } from "@themes/lib/theme";
-import { NextRequest, NextResponse } from "next/server";
 import { ImageResponse } from "@vercel/og";
+import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "edge";
 
@@ -29,35 +29,35 @@ const inter600 = fetch(new URL(`../assets/Inter-SemiBold.woff`, import.meta.url)
 const inter700 = fetch(new URL(`../assets/Inter-Bold.woff`, import.meta.url)).then((res) => res.arrayBuffer());
 
 const lightGridImage1 = fetch(new URL(`../assets/grid-item-1-light.jpg`, import.meta.url)).then((res) =>
-  res.arrayBuffer()
+  res.arrayBuffer(),
 );
 const lightGridImage2 = fetch(new URL(`../assets/grid-item-2-light.jpg`, import.meta.url)).then((res) =>
-  res.arrayBuffer()
+  res.arrayBuffer(),
 );
 const lightGridImage3 = fetch(new URL(`../assets/grid-item-3-light.jpg`, import.meta.url)).then((res) =>
-  res.arrayBuffer()
+  res.arrayBuffer(),
 );
 const lightGridImage4 = fetch(new URL(`../assets/grid-item-4-light.jpg`, import.meta.url)).then((res) =>
-  res.arrayBuffer()
+  res.arrayBuffer(),
 );
 const lightGridImage5 = fetch(new URL(`../assets/grid-item-5-light.jpg`, import.meta.url)).then((res) =>
-  res.arrayBuffer()
+  res.arrayBuffer(),
 );
 
 const darkGridImage1 = fetch(new URL(`../assets/grid-item-1-dark.jpg`, import.meta.url)).then((res) =>
-  res.arrayBuffer()
+  res.arrayBuffer(),
 );
 const darkGridImage2 = fetch(new URL(`../assets/grid-item-2-dark.jpg`, import.meta.url)).then((res) =>
-  res.arrayBuffer()
+  res.arrayBuffer(),
 );
 const darkGridImage3 = fetch(new URL(`../assets/grid-item-3-dark.jpg`, import.meta.url)).then((res) =>
-  res.arrayBuffer()
+  res.arrayBuffer(),
 );
 const darkGridImage4 = fetch(new URL(`../assets/grid-item-4-dark.jpg`, import.meta.url)).then((res) =>
-  res.arrayBuffer()
+  res.arrayBuffer(),
 );
 const darkGridImage5 = fetch(new URL(`../assets/grid-item-5-dark.jpg`, import.meta.url)).then((res) =>
-  res.arrayBuffer()
+  res.arrayBuffer(),
 );
 
 const checkIcon = (
@@ -166,10 +166,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid Theme" }, { status: 400 });
     }
 
-    const colors = colorOrder.reduce((acc: any, color) => {
-      acc[color] = colorsArray[colorOrder.indexOf(color)];
-      return acc;
-    }, {});
+    const colors = colorOrder.reduce(
+      (acc: Record<(typeof colorOrder)[number], string>, color) => {
+        acc[color] = colorsArray[colorOrder.indexOf(color)] || "";
+        return acc;
+      },
+      {} as Record<(typeof colorOrder)[number], string>,
+    );
 
     const theme: Theme = {
       appearance,
@@ -614,7 +617,7 @@ export async function GET(request: NextRequest) {
           { name: "Inter", data: inter600Data, weight: 600, style: "normal" },
           { name: "Inter", data: inter700Data, weight: 700, style: "normal" },
         ],
-      }
+      },
     );
   } catch (e) {
     return NextResponse.json(e);

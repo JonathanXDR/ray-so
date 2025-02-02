@@ -1,19 +1,19 @@
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
+import bundleAnalyzer from "@next/bundle-analyzer";
+import type { NextConfig } from "next";
+
+const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
-/** @type {import('next').NextConfig} */
-
-const nextConfig = {
+const nextConfig: NextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   transpilePackages: ["geist", "highlight.js"],
   experimental: {
     optimizePackageImports: ["shiki"],
   },
   webpack(config) {
     // Grab the existing rule that handles SVG imports
-    const fileLoaderRule = config.module.rules.find((rule) => rule.test?.test?.(".svg"));
+    const fileLoaderRule = config.module.rules.find((rule: { test?: RegExp }) => rule.test?.test?.(".svg"));
 
     config.module.rules.push(
       // Reapply the existing rule, but only for svg imports ending in ?url
@@ -42,14 +42,16 @@ const nextConfig = {
             },
           },
         ],
-      }
+      },
     );
 
     // Modify the file loader rule to ignore *.svg, since we have it handled now.
     fileLoaderRule.exclude = /\.svg$/i;
 
     // find the built-in loader
-    const imageLoaderRule = config.module.rules.find((rule) => rule.loader === "next-image-loader");
+    const imageLoaderRule = config.module.rules.find(
+      (rule: { loader?: string }) => rule.loader === "next-image-loader",
+    );
     // make the loader ignore *.inline files
     imageLoaderRule.exclude = /\.inline\.(png|jpg|svg)$/i;
 
@@ -67,6 +69,8 @@ const nextConfig = {
   },
   async rewrites() {
     return {
+      beforeFiles: [],
+      afterFiles: [],
       fallback: [
         {
           source: "/:path*",
@@ -209,4 +213,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer(nextConfig);

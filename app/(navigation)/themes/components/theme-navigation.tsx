@@ -1,8 +1,8 @@
 "use client";
-import React from "react";
-import { Theme } from "@themes/lib/theme";
-import { useRaycastTheme } from "@themes/components/raycast-theme-provider";
 import { ChevronLeftIcon, ChevronRightIcon } from "@raycast/icons";
+import { useRaycastTheme } from "@themes/components/raycast-theme-provider";
+import { Theme } from "@themes/lib/theme";
+import React from "react";
 
 export function ThemeNavigation({ themes }: { themes: Theme[] }) {
   const { activeTheme, setActiveTheme } = useRaycastTheme();
@@ -35,7 +35,7 @@ export function ThemeNavigation({ themes }: { themes: Theme[] }) {
         setActiveTheme(
           isDarkThemeActive
             ? nextDarkTheme || darkThemes[darkThemes.length - 1]
-            : nextLightTheme || lightThemes[lightThemes.length - 1]
+            : nextLightTheme || lightThemes[lightThemes.length - 1],
         );
       }
     };
@@ -97,12 +97,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ children, cla
   <button
     {...props}
     ref={ref}
-    className={`h-[30px] flex items-center gap-2 px-4 outline-none relative
+    className={`h-[30px] flex items-center gap-2 px-4 outline-hidden relative
       bg-white/10
       hover:bg-white/50 
       
       disabled:text-black/40
-      disabled:dark:text-white/40
+      dark:disabled:text-white/40
       
       dark:bg-black/10
       dark:hover:bg-black/50 
@@ -114,7 +114,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ children, cla
         focus:shadow-[inset_0px_0px_0px_1px_#737373,0px_0px_0px_1px_#737373] 
 
         dark:shadow-[inset_0px_0px_0px_1px_#484848] 
-        disabled:dark:shadow-[inset_0px_0px_0px_1px_rgba(255,255,255,0.1)] 
+        dark:disabled:shadow-[inset_0px_0px_0px_1px_rgba(255,255,255,0.1)] 
         dark:focus:shadow-[inset_0px_0px_0px_1px_#484848,0px_0px_0px_1px_#484848] 
         ${className}`}
   >

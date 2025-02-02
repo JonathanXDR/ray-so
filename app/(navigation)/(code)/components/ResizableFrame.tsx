@@ -14,8 +14,8 @@ interface ResizableFrameProps extends PropsWithChildren {
   onChangeFile: (file: File, index: number) => void;
 }
 
-let maxWidth = 920;
-let minWidth = 520;
+const maxWidth = 920;
+const minWidth = 520;
 
 const ResizableFrame: React.FC<ResizableFrameProps> = ({ children, files, onChangeFile }) => {
   const currentHandleRef = useRef<Handle>();
@@ -49,7 +49,7 @@ const ResizableFrame: React.FC<ResizableFrameProps> = ({ children, files, onChan
   );
 
   const clearSelection = useCallback(() => {
-    var sel = document.getSelection();
+    const sel = document.getSelection();
     if (sel) {
       if (sel.removeAllRanges) {
         sel.removeAllRanges();

@@ -1,8 +1,8 @@
 "use client";
 
+import { toast } from "@/components/toast";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { toast } from "@/components/toast";
 
 const flavors = ["raycast", "raycastinternal"];
 

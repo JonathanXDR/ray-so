@@ -1,11 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable jsx-a11y/alt-text */
 
-import { ImageResponse } from "@vercel/og";
 import { RaycastLogoNegIcon } from "@raycast/icons";
+import { ImageResponse } from "@vercel/og";
 import { CSSProperties } from "react";
-import { Preset } from "../presets";
 import { IconComponent } from "../components/Icons";
+import { Preset } from "../presets";
 
 export const runtime = "edge";
 
@@ -21,10 +21,14 @@ export async function GET(request: Request) {
 
     const interRegular = await fetch(new URL(`./Inter-Regular.ttf`, import.meta.url)).then((res) => res.arrayBuffer());
     const interSemiBold = await fetch(new URL(`./Inter-SemiBold.ttf`, import.meta.url)).then((res) =>
-      res.arrayBuffer()
+      res.arrayBuffer(),
     );
 
-    const bgImageData = await fetch(new URL(`./og-bg.png`, import.meta.url)).then((res) => res.arrayBuffer());
+    const bgImageData = await fetch(new URL(`./og-bg.png`, import.meta.url)).then(async (res) => {
+      const buffer = await res.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString("base64");
+      return `data:image/png;base64,${base64}`;
+    });
 
     return new ImageResponse(
       (
@@ -43,7 +47,7 @@ export async function GET(request: Request) {
           <img
             width="1024"
             height="512"
-            src={bgImageData as any}
+            src={bgImageData}
             style={{
               position: "absolute",
               inset: 0,
@@ -152,10 +156,10 @@ export async function GET(request: Request) {
             style: "normal",
           },
         ],
-      }
+      },
     );
-  } catch (e: any) {
-    console.log(`${e.message}`);
+  } catch (e) {
+    console.log(`${(e as Error).message}`);
     return new Response(`Failed to generate the image`, {
       status: 500,
     });

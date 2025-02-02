@@ -1,6 +1,6 @@
 export type Language = {
   name: string;
-  src: () => Promise<any>;
+  src: () => Promise<{ default: unknown }>;
 };
 
 export const LANGUAGES: { [index: string]: Language } = {

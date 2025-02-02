@@ -15,9 +15,9 @@ export default function FileUpload({ onFilesSelected, ...props }: { onFilesSelec
     try {
       const filesArray = Array.from(fileList);
       await onFilesSelected(filesArray);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error uploading file:", error);
-      toast.error(error.message || "Error uploading file");
+      toast.error((error as Error).message || "Error uploading file");
     } finally {
       setUploading(false);
     }
@@ -34,7 +34,7 @@ export default function FileUpload({ onFilesSelected, ...props }: { onFilesSelec
           disabled={uploading}
           multiple
         />
-        {!uploading ? <UploadIcon className="!w-4 !h-4" /> : <CircleProgressIcon className="animate-spin" />}
+        {!uploading ? <UploadIcon className="w-4! h-4!" /> : <CircleProgressIcon className="animate-spin" />}
       </Button>
     </div>
   );

@@ -2,9 +2,9 @@ import { CheckCircleIcon } from "@raycast/icons";
 
 export function List() {
   return (
-    <div className="py-1 px-2 text-[--text]">
-      <div className="p-2 text-xs leading-none font-medium tracking-[0.1px] text-[--text-600]">List</div>
-      <div className="flex items-center gap-3 h-[40px] px-2 rounded-lg bg-[--selection-100]">
+    <div className="py-1 px-2 text-(--text)">
+      <div className="p-2 text-xs leading-none font-medium tracking-[0.1px] text-(--text-600)">List</div>
+      <div className="flex items-center gap-3 h-[40px] px-2 rounded-lg bg-(--selection-100)">
         <div>
           <CheckCircleIcon className="w-5 h-5" />
         </div>
@@ -49,7 +49,7 @@ export function List() {
 function Tag({ color, bg, children }: { color: string; bg: string; children: React.ReactNode }) {
   return (
     <span
-      className="inline-flex items-center px-2 rounded-md text-[--color] bg-[--bg]"
+      className="inline-flex items-center px-2 rounded-md text-(--color) bg-(--bg)"
       style={
         {
           "--color": color,

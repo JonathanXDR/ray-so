@@ -2,7 +2,7 @@ import { getRaycastFlavor } from "@/app/RaycastFlavor";
 import { Theme } from "@themes/lib/theme";
 
 export function makeRaycastImportUrl(theme: Theme) {
-  const { slug, colors, ...restTheme } = theme;
+  const { colors, ...restTheme } = theme;
 
   const raycastProtocol = getRaycastFlavor();
   const url = new URL(`${raycastProtocol}://theme`);

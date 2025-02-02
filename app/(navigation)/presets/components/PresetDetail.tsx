@@ -1,9 +1,12 @@
 "use client";
 
-import React from "react";
-import copy from "copy-to-clipboard";
-import clsx from "clsx";
-
+import { AiModel } from "@/api/ai";
+import { Button } from "@/components/button";
+import { ButtonGroup } from "@/components/button-group";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/dropdown-menu";
+import { Kbd } from "@/components/kbd";
+import { NavigationActions } from "@/components/navigation";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import {
   CheckIcon,
   ChevronDownIcon,
@@ -15,26 +18,19 @@ import {
   PlusCircleIcon,
   XMarkCircleIcon,
 } from "@raycast/icons";
-
-import { PresetComponent } from "./Preset";
-import { creativity as creativityString } from "./Preset";
-import CreativityIcon from "./CreativityIcon";
-import ModelIcon from "./ModelIcon";
-
-import styles from "./PresetDetail.module.css";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
-import { IconComponent } from "./Icons";
-import { Preset } from "../presets";
-import { ButtonGroup } from "@/components/button-group";
-import { Button } from "@/components/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/dropdown-menu";
-import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
+import clsx from "clsx";
+import copy from "copy-to-clipboard";
 import { useRouter } from "next/navigation";
-import { Toast, ToastTitle, ToastViewport } from "./Toast";
-import { NavigationActions } from "@/components/navigation";
+import React from "react";
+import { Preset } from "../presets";
+import { addToRaycast, copyData, downloadData, makeUrl } from "../utils/actions";
+import CreativityIcon from "./CreativityIcon";
+import { IconComponent } from "./Icons";
 import { InfoDialog } from "./InfoDialog";
-import { Kbd } from "@/components/kbd";
-import { AiModel } from "@/api/ai";
+import ModelIcon from "./ModelIcon";
+import { creativity as creativityString, PresetComponent } from "./Preset";
+import styles from "./PresetDetail.module.css";
+import { Toast, ToastTitle } from "./Toast";
 
 type PresetPageProps = {
   preset: Preset;
@@ -95,7 +91,7 @@ export function PresetDetail({ preset, relatedPresets, models }: PresetPageProps
     if (!preset.id) {
       const encodedUrl = encodeURIComponent(urlToCopy);
       const response = await fetch(`https://ray.so/api/shorten-url?url=${encodedUrl}&ref=presets`).then((res) =>
-        res.json()
+        res.json(),
       );
 
       if (response.link) {

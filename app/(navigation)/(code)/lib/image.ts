@@ -1,4 +1,4 @@
-import { toPng as htmlToPng, toSvg as htmlToSvg, toBlob as htmlToBlob } from "html-to-image";
+import { toBlob as htmlToBlob, toPng as htmlToPng, toSvg as htmlToSvg } from "html-to-image";
 
 const imageFilter = (node: HTMLElement) => node.tagName !== "TEXTAREA" && !node.dataset?.ignoreInExport;
 

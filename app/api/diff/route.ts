@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ results });
-  } catch (err: any) {
-    console.error("Error processing patch:", err);
+  } catch (err) {
+    console.error("Error processing patch:", err as Error);
     return NextResponse.json({ error: "Failed to process patch file." }, { status: 500 });
   }
 }

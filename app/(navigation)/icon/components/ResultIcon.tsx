@@ -1,7 +1,5 @@
 import React, { useId } from "react";
-
 import noisePicture from "../assets/noise.inline.png";
-
 import { SettingsType } from "../lib/types";
 
 type PropTypes = {
@@ -124,7 +122,7 @@ const ResultIcon = React.forwardRef<SVGSVGElement, PropTypes>(
         ) : null}
       </svg>
     );
-  }
+  },
 );
 
 ResultIcon.displayName = "ResultIcon";

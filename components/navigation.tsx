@@ -1,27 +1,18 @@
 "use client";
 
-import { useRouter, useSelectedLayoutSegments } from "next/navigation";
-
-import {
-  BrandGithubIcon,
-  BrandSlackIcon,
-  BrandXIcon,
-  BrandYoutubeIcon,
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  RaycastLogoNegIcon,
-} from "@raycast/icons";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
-import Link from "next/link";
-import { cn } from "@/utils/cn";
 import CodeImagesIcon from "@/app/assets/code-images.svg";
 import IconMakerIcon from "@/app/assets/icon-maker.svg";
-import SnippetExplorerIcon from "@/app/assets/snippet-explorer.svg";
 import PresetExplorerIcon from "@/app/assets/preset-explorer.svg";
-import QuicklinkExplorerIcon from "@/app/assets/quicklink-explorer.svg";
 import PromptExplorerIcon from "@/app/assets/prompt-explorer.svg";
+import QuicklinkExplorerIcon from "@/app/assets/quicklink-explorer.svg";
+import SnippetExplorerIcon from "@/app/assets/snippet-explorer.svg";
 import ThemeExplorerIcon from "@/app/assets/theme-explorer.svg";
+import { cn } from "@/utils/cn";
+import { ChevronDownIcon, ChevronLeftIcon } from "@raycast/icons";
+import Link from "next/link";
+import { useRouter, useSelectedLayoutSegments } from "next/navigation";
 import { Button } from "./button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
 
 const links = [
   {

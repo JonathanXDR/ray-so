@@ -1,11 +1,10 @@
 import classNames from "classnames";
+import { useAtomValue, useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
-import { Language, LANGUAGES } from "../util/languages";
-
-import styles from "./Editor.module.css";
 import { highlightedLinesAtom, highlighterAtom, loadingLanguageAtom } from "../store";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { darkModeAtom, themeAtom } from "../store/themes";
+import { Language, LANGUAGES } from "../util/languages";
+import styles from "./Editor.module.css";
 
 type PropTypes = {
   selectedLanguage: Language | null;

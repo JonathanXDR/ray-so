@@ -1,7 +1,7 @@
-import Image from "next/image";
-import lightWallpaper from "@themes/assets/bg-light.jpeg";
 import darkWallpaper from "@themes/assets/bg-dark.jpeg";
+import lightWallpaper from "@themes/assets/bg-light.jpeg";
 import { Dock } from "@themes/components/dock";
+import Image from "next/image";
 
 export function Desktop({ children }: { children?: React.ReactNode }) {
   return (
@@ -21,7 +21,7 @@ export function Desktop({ children }: { children?: React.ReactNode }) {
           className="object-cover select-none pointer-events-none"
           src={darkWallpaper}
           fill
-          placeholder="blur"
+          placeholder="blur-sm"
           quality={100}
           alt=""
         />
@@ -30,7 +30,7 @@ export function Desktop({ children }: { children?: React.ReactNode }) {
           className="object-cover select-none pointer-events-none"
           src={lightWallpaper}
           fill
-          placeholder="blur"
+          placeholder="blur-sm"
           quality={100}
           alt=""
         />

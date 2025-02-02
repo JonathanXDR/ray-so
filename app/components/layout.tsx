@@ -1,5 +1,5 @@
-import OgImage from "./og-image.png";
 import { Metadata } from "next";
+import OgImage from "./og-image.png";
 
 const title = "Ray.so Components";
 const description = "Component playground for the ray.so ecosystem.";

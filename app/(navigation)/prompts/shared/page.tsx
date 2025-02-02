@@ -1,13 +1,12 @@
-import React from "react";
-import { notFound } from "next/navigation";
-import { Metadata } from "next";
-import { Shared } from "./shared";
-import { Prompt } from "../prompts";
 import { nanoid } from "nanoid";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Prompt } from "../prompts";
+import { Shared } from "./shared";
 
 type Props = {
-  params: { slug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 function parseURLPrompt(promptQueryString?: string | string[]): Prompt[] {
@@ -27,7 +26,8 @@ function parseURLPrompt(promptQueryString?: string | string[]): Prompt[] {
   }));
 }
 
-export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const searchParams = await props.searchParams;
   const prompts = parseURLPrompt(searchParams.prompts as string);
   if (!prompts) {
     notFound();
@@ -112,7 +112,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   }
 }
 
-export default async function Page({ params, searchParams }: Props) {
+export default async function Page(props: Props) {
+  const searchParams = await props.searchParams;
   const prompts = parseURLPrompt(searchParams.prompts as string);
   if (!prompts) {
     notFound();

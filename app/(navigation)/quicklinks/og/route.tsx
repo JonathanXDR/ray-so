@@ -1,11 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable jsx-a11y/alt-text */
 
+import { IconName, RaycastLogoNegIcon } from "@raycast/icons";
 import { ImageResponse } from "@vercel/og";
-import { RaycastLogoNegIcon } from "@raycast/icons";
 import { CSSProperties } from "react";
 import { IconComponent } from "../../presets/components/Icons";
-import { Base64 } from "js-base64";
 
 export const runtime = "edge";
 
@@ -26,7 +25,12 @@ export async function GET(request: Request) {
     const interSemiBold = await fetch(new URL(`./Inter-SemiBold.ttf`, import.meta.url)).then((res) =>
       res.arrayBuffer(),
     );
-    const bgImageData = await fetch(new URL(`./og-bg.png`, import.meta.url)).then((res) => res.arrayBuffer());
+
+    const bgImageData = await fetch(new URL(`./og-bg.png`, import.meta.url)).then(async (res) => {
+      const buffer = await res.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString("base64");
+      return `data:image/png;base64,${base64}`;
+    });
 
     return new ImageResponse(
       (
@@ -45,7 +49,7 @@ export async function GET(request: Request) {
           <img
             width="1024"
             height="512"
-            src={bgImageData as any}
+            src={bgImageData}
             style={{
               position: "absolute",
               inset: 0,
@@ -77,7 +81,7 @@ export async function GET(request: Request) {
                   marginBottom: 24,
                 }}
               >
-                <IconComponent icon={iconName as any} width={48} height={48} />
+                <IconComponent icon={iconName as IconName} width={48} height={48} />
               </div>
             ) : hasIconUrl && iconUrl ? (
               <div
@@ -173,8 +177,8 @@ export async function GET(request: Request) {
         ],
       },
     );
-  } catch (e: any) {
-    console.log(`${e.message}`);
+  } catch (e) {
+    console.log(`${(e as Error).message}`);
     return new Response(`Failed to generate the image`, {
       status: 500,
     });

@@ -1,9 +1,9 @@
-import copy from "copy-to-clipboard";
-import { Prompt } from "../prompts";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { BASE_URL } from "@/utils/common";
 import { Model } from "@/api/ai";
 import { getRaycastFlavor } from "@/app/RaycastFlavor";
+import { BASE_URL } from "@/utils/common";
+import copy from "copy-to-clipboard";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { Prompt } from "../prompts";
 
 function prepareModel(model?: string) {
   if (model && /^".*"$/.test(model)) {

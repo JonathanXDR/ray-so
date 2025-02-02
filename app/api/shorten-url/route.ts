@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { Dub } from "dub";
+import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "edge";
 

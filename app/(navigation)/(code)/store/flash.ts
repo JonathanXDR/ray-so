@@ -1,14 +1,14 @@
 import { atom } from "jotai";
 
 export type FlashMessage = {
-  icon?: any;
+  icon?: React.ReactNode;
   message: string;
   variant?: "info" | "unlock";
   timeout?: number;
 };
 
 const timeoutAtom = atom<number>(0);
-const iconAtom = atom<any>(null);
+const iconAtom = atom<React.ReactNode>(null);
 const messageAtom = atom<string>("");
 const variantAtom = atom<"info" | "unlock">("info");
 export const flashShownAtom = atom(false);
@@ -33,8 +33,8 @@ export const derivedFlashMessageAtom = atom(
         window.setTimeout(() => {
           set(flashShownAtom, false);
           set(messageAtom, "");
-        }, flashMessage.timeout)
+        }, flashMessage.timeout),
       );
     }
-  }
+  },
 );

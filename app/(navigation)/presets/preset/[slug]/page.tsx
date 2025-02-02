@@ -1,22 +1,23 @@
-import { notFound } from "next/navigation";
-import { allPresets } from "../../presets";
 import { getAvailableAiModels } from "@/api/ai";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { PresetDetail } from "../../components/PresetDetail";
-import { Metadata, ResolvingMetadata } from "next";
+import { allPresets } from "../../presets";
 
 type Props = {
-  params: { slug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const preset = allPresets.find((preset) => preset.id === params.slug);
   if (!preset) {
     notFound();
   }
   const pageTitle = `${preset.name} - Raycast AI Preset`;
   const ogImage = `/presets/og?title=${encodeURIComponent(preset.name)}&description=${encodeURIComponent(
-    preset.description || ""
+    preset.description || "",
   )}&icon=${preset.icon}`;
 
   return {
@@ -54,7 +55,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function Page({ params }: Props) {
+export default async function Page(props: Props) {
+  const params = await props.params;
   if (!params.slug) {
     notFound();
   }

@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import classNames from "classnames";
 import { useAtom } from "jotai";
+import React, { useEffect, useRef } from "react";
 import { CSSTransition } from "react-transition-group";
 import { derivedFlashMessageAtom, flashShownAtom } from "../store/flash";
-import classNames from "classnames";
 import useAudio from "../util/useAudio";
-
 import styles from "./FlashMessage.module.css";
 
 const FlashMessage: React.FC = () => {
@@ -12,7 +11,7 @@ const FlashMessage: React.FC = () => {
   const [flashMessage] = useAtom(derivedFlashMessageAtom);
   const [flashShown] = useAtom(flashShownAtom);
 
-  const [playing, toggle] = useAudio("unlock.mp3");
+  const [, toggle] = useAudio("unlock.mp3");
   useEffect(() => {
     if (flashMessage?.variant === "unlock" && flashShown) {
       toggle();

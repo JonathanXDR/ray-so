@@ -1,9 +1,8 @@
-const fs = require("fs");
-const path = require("path");
-const glob = require("glob").glob;
-const promisify = require("util").promisify;
-const readFileAsync = promisify(fs.readFile);
-const download = require("image-downloader");
+import { readFile } from 'fs';
+import { glob } from 'glob';
+import { promisify } from 'util';
+
+const readFileAsync = promisify(readFile);
 
 const themesDir = path.join(process.cwd(), "app", "(navigation)", "themes", "themes");
 

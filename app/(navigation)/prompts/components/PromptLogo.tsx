@@ -1,4 +1,4 @@
-import { StarsIcon, RaycastLogoNegIcon } from "@raycast/icons";
+import { RaycastLogoNegIcon, StarsIcon } from "@raycast/icons";
 import styles from "./PromptLogo.module.css";
 
 export function PromptLogo() {

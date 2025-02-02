@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import Image from "next/image";
 import React, { useContext, useEffect } from "react";
 import clerkPattern from "../assets/clerk/pattern.svg?url";
 import mintlifyPatternDark from "../assets/mintlify-pattern-dark.svg?url";
@@ -48,7 +49,7 @@ const SupabaseFrame = () => {
   const [padding] = useAtom(paddingAtom);
   const [showBackground] = useAtom(showBackgroundAtom);
   const [fileName, setFileName] = useAtom(fileNameAtom);
-  const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
+  const [selectedLanguage] = useAtom(selectedLanguageAtom);
 
   return (
     <div
@@ -86,7 +87,6 @@ const TailwindFrame = () => {
   const [darkMode] = useAtom(darkModeAtom);
   const [padding] = useAtom(paddingAtom);
   const [showBackground] = useAtom(showBackgroundAtom);
-  const [fileName, setFileName] = useAtom(fileNameAtom);
   const isSafari = useIsSafari();
 
   return (
@@ -101,7 +101,7 @@ const TailwindFrame = () => {
       style={{ padding }}
     >
       {!showBackground && <div data-ignore-in-export className={styles.transparentPattern}></div>}
-      {showBackground && <img src={beams.src} alt="beams" className={styles.tailwindBeams} />}
+      {showBackground && <Image src={beams.src} alt="beams" className={styles.tailwindBeams} />}
       <div className={styles.beams} />
       <div className={styles.tailwindWindow}>
         {showBackground && (
@@ -145,7 +145,7 @@ const ClerkFrame = () => {
       style={{ padding }}
     >
       {!showBackground && <div data-ignore-in-export className={styles.transparentPattern}></div>}
-      {showBackground && <img src={clerkPattern.src} alt="" className={styles.clerkPattern} />}
+      {showBackground && <Image src={clerkPattern.src} alt="" className={styles.clerkPattern} />}
       <div className={styles.clerkWindow}>
         <div className={styles.clerkCode}>
           <Editor />
@@ -174,7 +174,7 @@ const MintlifyFrame = () => {
       {!showBackground && <div data-ignore-in-export className={styles.transparentPattern}></div>}
       {showBackground && (
         <span className={styles.mintlifyPatternWrapper}>
-          <img
+          <Image
             src={darkMode ? mintlifyPatternDark.src : mintlifyPatternLight.src}
             alt=""
             className={styles.mintlifyPattern}
@@ -307,7 +307,7 @@ interface FrameProps {
   handleChangeFile: (file: File) => void;
 }
 
-const Frame = ({ resize = true, code, files, handleChangeFile }: FrameProps) => {
+const Frame = ({ code, files, handleChangeFile }: FrameProps) => {
   const frameContext = useContext(FrameContext);
   const setCode = useSetAtom(codeAtom);
 
