@@ -4,48 +4,20 @@ import { Button } from "@/components/button";
 import { toast } from "@/components/toast";
 import { CircleProgressIcon, UploadIcon } from "@raycast/icons";
 import React, { useState } from "react";
-import * as uuid from "uuid";
-import { File } from "../lib/types";
 
 export default function FileUpload({ onFilesSelected, ...props }: { onFilesSelected: (files: File[]) => void }) {
   const [uploading, setUploading] = useState(false);
-  const [fileNames, setFileNames] = useState<string[]>([]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
     setUploading(true);
-    setFileNames([]);
     try {
-      const formData = new FormData();
-      formData.append("patchFile", file);
-
-      const res = await fetch("/api/diff", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || "Error uploading patch");
-      }
-
-      const data = await res.json();
-      if (!data.results) {
-        toast.error("No changed files found");
-        return;
-      }
-
-      const patchFiles = data.results.map((resItem: any) => ({
-        fileName: resItem.fileName,
-        id: uuid.v7(),
-      })) as File[];
-
-      onFilesSelected(patchFiles);
-      setFileNames(patchFiles.map((pf) => pf.fileName));
+      const filesArray = Array.from(fileList);
+      await onFilesSelected(filesArray);
     } catch (error: any) {
-      console.error("Error uploading .patch:", error);
-      toast.error(error.message || "Error uploading patch");
+      console.error("Error uploading file:", error);
+      toast.error(error.message || "Error uploading file");
     } finally {
       setUploading(false);
     }
@@ -57,22 +29,12 @@ export default function FileUpload({ onFilesSelected, ...props }: { onFilesSelec
         <input
           type="file"
           className="absolute top-0 right-0 bottom-0 left-0 cursor-pointer opacity-0"
-          accept=".patch"
+          accept="*"
           onChange={handleFileChange}
           disabled={uploading}
+          multiple
         />
-        {!uploading && (
-          <>
-            <UploadIcon className="!w-4 !h-4" />
-            {/* Upload */}
-          </>
-        )}
-        {uploading && (
-          <>
-            <CircleProgressIcon className="animate-spin" />
-            {/* Uploading... */}
-          </>
-        )}
+        {!uploading ? <UploadIcon className="!w-4 !h-4" /> : <CircleProgressIcon className="animate-spin" />}
       </Button>
     </div>
   );

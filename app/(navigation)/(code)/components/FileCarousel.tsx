@@ -3,7 +3,6 @@
 import { Button } from "@/components/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@raycast/icons";
 import { useState } from "react";
-import { File } from "../lib/types";
 
 export function FileCarousel({
   children,

@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { getHighlighterCore, Highlighter } from "shiki";
 import getWasm from "shiki/wasm";
+import * as uuid from "uuid";
 import tailwindDark from "./assets/tailwind/dark.json";
 import tailwindLight from "./assets/tailwind/light.json";
 import styles from "./code.module.css";
@@ -25,8 +26,7 @@ import Frame from "./components/Frame";
 import { InfoDialog } from "./components/InfoDialog";
 import { Instructions } from "./components/Instructions";
 import NoSSR from "./components/NoSSR";
-import { usePatchFiles } from "./hooks/useFiles";
-import { File } from "./lib/types";
+import { useFiles } from "./hooks/useFiles";
 import { highlighterAtom } from "./store";
 import FrameContextStore from "./store/FrameContextStore";
 import { shikiTheme } from "./store/themes";
@@ -38,7 +38,7 @@ function extractFiles(elements: Element[], files: File[]): File[] {
   for (const el of elements) {
     const fileName = el.getAttribute("data-file-name");
     if (!fileName) continue;
-    const found = files.find((f) => f.fileName === fileName);
+    const found = files.find((f) => f.name === fileName);
     if (found) result.push(found);
   }
   return result;
@@ -46,19 +46,19 @@ function extractFiles(elements: Element[], files: File[]): File[] {
 
 export function Code() {
   const [highlighter, setHighlighter] = useAtom(highlighterAtom);
-  const { patchFiles, currentPatch, handleFilesSelected, handleChangeFile } = usePatchFiles();
+  const { files, currentFile, handleFilesSelected, handleChangeFile, removeFile, updateFile } = useFiles();
 
   const [search, setSearch] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
   useEffect(() => {
     if (selectedFiles.length === 1) {
-      const single = patchFiles.find((f) => f.fileName === selectedFiles[0]);
+      const single = files.find((f) => f.name === selectedFiles[0]);
       if (single) handleChangeFile(single);
     }
-  }, [selectedFiles, patchFiles, handleChangeFile]);
+  }, [selectedFiles, files, handleChangeFile]);
 
-  const filteredFiles = patchFiles.filter((f) => f.fileName.toLowerCase().includes(search.toLowerCase()));
+  const filteredFiles = files.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
 
   const [enableViewObserver, setEnableViewObserver] = useState(false);
   useSectionInViewObserver({ headerHeight: 50, enabled: enableViewObserver });
@@ -78,24 +78,22 @@ export function Code() {
       changed: { added, removed },
     },
   }: SelectionEvent) => {
-    const addedFiles = extractFiles(added, patchFiles);
-    const removedFiles = extractFiles(removed, patchFiles);
+    const addedFiles = extractFiles(added, files);
+    const removedFiles = extractFiles(removed, files);
 
     setSelectedFileIds((prevFileIds) => {
       let fileIds = [...prevFileIds];
 
       addedFiles.forEach((file) => {
-        if (!file) {
-          return;
-        }
-        if (fileIds.includes(file.id)) {
-          return;
-        }
-        fileIds.push(file.id);
+        if (!file) return;
+        const id = uuid.v4();
+        if (fileIds.includes(id)) return;
+        fileIds.push(id);
       });
 
       removedFiles.forEach((file) => {
-        fileIds = fileIds.filter((s) => s !== file?.id);
+        const id = uuid.v4();
+        fileIds = fileIds.filter((s) => s !== id);
       });
 
       return fileIds;
@@ -212,7 +210,7 @@ export function Code() {
           <div className={styles.sidebarInner}>
             <ScrollArea>
               <div
-                className={`${styles.sidebarContent} ${!currentPatch?.fileName.endsWith(".patch") ? "justify-between" : ""}`}
+                className={`${styles.sidebarContent} ${!currentFile?.name.endsWith(".patch") ? "justify-between" : ""}`}
               >
                 <div className={styles.sidebarNav}>
                   <div className="flex gap-3">
@@ -238,16 +236,16 @@ export function Code() {
                     {filteredFiles.map((file) => {
                       return (
                         <NavItem
-                          key={file.fileName}
+                          key={file.name}
                           file={file}
-                          isActive={selectedFiles.includes(file.fileName)}
+                          isActive={selectedFiles.includes(file.name)}
                           onSelect={(e) => {
                             e.preventDefault();
 
                             setSelectedFiles((prev) => {
-                              return prev.includes(file.fileName)
-                                ? prev.filter((f) => f !== file.fileName)
-                                : [...prev, file.fileName];
+                              return prev.includes(file.name)
+                                ? prev.filter((f) => f !== file.name)
+                                : [...prev, file.name];
                             });
                           }}
                         />
@@ -256,7 +254,7 @@ export function Code() {
                   </div>
                 </div>
 
-                {currentPatch && currentPatch.fileName.endsWith(".patch") && (
+                {currentFile && currentFile.name.endsWith(".patch") && (
                   <>
                     <span className={styles.sidebarNavDivider}></span>
 
@@ -327,7 +325,7 @@ export function Code() {
 
         <div className={styles.app}>
           <NoSSR>
-            {highlighter && <Frame patchFiles={patchFiles} handleChangeFile={handleChangeFile} />}
+            {highlighter && <Frame files={files} handleChangeFile={handleChangeFile} />}
             <Controls />
           </NoSSR>
         </div>
@@ -348,10 +346,10 @@ function NavItem({
   const activeSection = useSectionInView();
 
   return (
-    <li onClick={onSelect} className={styles.sidebarNavItem} data-active={isActive} data-file-name={file.fileName}>
+    <li onClick={onSelect} className={styles.sidebarNavItem} data-active={isActive} data-file-name={file.name}>
       <BlankDocumentIcon />
 
-      <span className={styles.fileName}>{file.fileName}</span>
+      <span className={styles.fileName}>{file.name}</span>
       <span className={styles.badge}>0</span>
     </li>
   );

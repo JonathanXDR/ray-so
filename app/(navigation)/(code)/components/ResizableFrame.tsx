@@ -3,7 +3,6 @@ import { useAtom } from "jotai";
 import React, { MouseEventHandler, PropsWithChildren, useCallback, useRef, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 import XMarkIcon from "../assets/icons/x-mark-circle-filled-16.svg";
-import { File } from "../lib/types";
 import { windowWidthAtom } from "../store";
 import { FileCarousel } from "./FileCarousel";
 import styles from "./ResizableFrame.module.css";
