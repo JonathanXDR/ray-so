@@ -69,7 +69,13 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
   let shouldOpenInRaycast: boolean = false;
 
   if (searchParams) {
-    themeInUrl = makeThemeObjectFromParams(searchParams);
+    const stringParams: { [key: string]: string } = {};
+    Object.entries(searchParams).forEach(([key, value]) => {
+      if (typeof value === "string") {
+        stringParams[key] = value;
+      }
+    });
+    themeInUrl = makeThemeObjectFromParams(stringParams);
     shouldOpenInRaycast = "addToRaycast" in searchParams;
   }
 

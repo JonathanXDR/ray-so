@@ -60,7 +60,7 @@ export async function getAllThemes(): Promise<Theme[]> {
 // This function checks whether the query params generated from Raycast's Theme Studio
 // can be converted into a Theme object that is used in this App
 
-function canConvertParamsToTheme(params: Theme): boolean {
+function canConvertParamsToTheme(params: { [key: string]: string }): boolean {
   const { appearance, name, version, colors } = params;
   return Boolean(appearance && name && version && colors);
 }
@@ -75,7 +75,7 @@ function convertLegacyColorIfNeeded(color: string) {
 
 // This function converts the query params generated from Raycast's Theme Studio
 // into a Theme object that is used in this App
-export function makeThemeObjectFromParams(params: Theme & { colors: string | ThemeColors }): Theme | undefined {
+export function makeThemeObjectFromParams(params: { [key: string]: string }): Theme | undefined {
   if (canConvertParamsToTheme(params)) {
     const { appearance, name, author, authorUsername, version, colors: colorString } = params;
 
@@ -100,7 +100,7 @@ export function makeThemeObjectFromParams(params: Theme & { colors: string | The
     };
 
     return {
-      appearance,
+      appearance: appearance as Theme["appearance"],
       name,
       version,
       author,

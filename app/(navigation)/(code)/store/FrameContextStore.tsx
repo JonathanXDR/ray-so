@@ -1,6 +1,6 @@
-import React, { createContext, PropsWithChildren, RefObject, useRef } from "react";
+import React, { createContext, createRef, PropsWithChildren, RefObject, useRef } from "react";
 
-export const FrameContext = createContext<RefObject<HTMLDivElement> | null>(null);
+export const FrameContext = createContext<RefObject<HTMLDivElement | null>>(createRef<HTMLDivElement>());
 
 const FrameContextStore: React.FC<PropsWithChildren> = ({ children }) => {
   const ref = useRef<HTMLDivElement>(null);

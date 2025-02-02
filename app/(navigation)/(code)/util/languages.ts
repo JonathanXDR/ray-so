@@ -1,6 +1,7 @@
 export type Language = {
   name: string;
-  src: () => Promise<{ default: unknown }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  src: () => Promise<any>;
 };
 
 export const LANGUAGES: { [index: string]: Language } = {

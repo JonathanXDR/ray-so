@@ -18,10 +18,10 @@ const maxWidth = 920;
 const minWidth = 520;
 
 const ResizableFrame: React.FC<ResizableFrameProps> = ({ children, files, onChangeFile }) => {
-  const currentHandleRef = useRef<Handle>();
+  const currentHandleRef = useRef<Handle>(null);
   const windowRef = useRef<HTMLDivElement>(null);
-  const startWidthRef = useRef<number>();
-  const startXRef = useRef<number>();
+  const startWidthRef = useRef<number>(null);
+  const startXRef = useRef<number>(null);
   const [windowWidth, setWindowWidth] = useAtom(windowWidthAtom);
   const [isResizing, setResizing] = useState(false);
   const resetWindowWidthRef = useRef<HTMLDivElement>(null);

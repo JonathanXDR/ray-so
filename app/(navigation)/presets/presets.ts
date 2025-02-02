@@ -1,6 +1,6 @@
 import { Model } from "@/api/ai";
 import { IconName, Icons } from "@raycast/icons";
-import { SVGProps } from "react";
+import { JSX, SVGProps } from "react";
 
 export type Preset = {
   id: string;

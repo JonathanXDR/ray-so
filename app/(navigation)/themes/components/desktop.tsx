@@ -21,7 +21,7 @@ export function Desktop({ children }: { children?: React.ReactNode }) {
           className="object-cover select-none pointer-events-none"
           src={darkWallpaper}
           fill
-          placeholder="blur-sm"
+          placeholder="blur"
           quality={100}
           alt=""
         />
@@ -30,7 +30,7 @@ export function Desktop({ children }: { children?: React.ReactNode }) {
           className="object-cover select-none pointer-events-none"
           src={lightWallpaper}
           fill
-          placeholder="blur-sm"
+          placeholder="blur"
           quality={100}
           alt=""
         />
