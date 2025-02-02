@@ -5,16 +5,23 @@ import { NavigationActions } from "@/components/navigation";
 import { ScrollArea } from "@/components/scroll-area";
 import { Switch } from "@/components/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
+import { cn } from "@/utils/cn";
+import useHotkeys from "@/utils/useHotkeys";
 import { useSectionInView, useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
 import * as Collapsible from "@radix-ui/react-collapsible";
-import { BlankDocumentIcon, ChevronDownIcon, Info01Icon, MagnifyingGlassIcon, TrashIcon } from "@raycast/icons";
-import { SelectionEvent } from "@viselect/react";
+import {
+  BlankDocumentIcon,
+  CheckListIcon,
+  ChevronDownIcon,
+  Info01Icon,
+  MagnifyingGlassIcon,
+  TrashIcon,
+} from "@raycast/icons";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { getHighlighterCore, Highlighter } from "shiki";
 import getWasm from "shiki/wasm";
-import * as uuid from "uuid";
 import tailwindDark from "./assets/tailwind/dark.json";
 import tailwindLight from "./assets/tailwind/light.json";
 import styles from "./code.module.css";
@@ -28,6 +35,7 @@ import { Instructions } from "./components/Instructions";
 import NoSSR from "./components/NoSSR";
 import { useFiles } from "./hooks/useFiles";
 import { highlighterAtom } from "./store";
+import { derivedFlashMessageAtom, flashShownAtom } from "./store/flash";
 import FrameContextStore from "./store/FrameContextStore";
 import { shikiTheme } from "./store/themes";
 import { isTouchDevice } from "./util/isTouchDevice";
@@ -45,6 +53,9 @@ function extractFiles(elements: Element[], files: File[]): File[] {
 }
 
 export function Code() {
+  const [highlightInlineDiff, setHighlightInlineDiff] = useState(true);
+  const [, setFlashMessage] = useAtom(derivedFlashMessageAtom);
+  const [, setFlashShown] = useAtom(flashShownAtom);
   const [highlighter, setHighlighter] = useAtom(highlighterAtom);
   const { files, currentFile, handleFilesSelected, handleChangeFile, removeFile, updateFile } = useFiles();
 
@@ -66,42 +77,6 @@ export function Code() {
     setEnableViewObserver(true);
   }, []);
 
-  const onStart = ({ event, selection }: SelectionEvent) => {
-    if (!isTouch && !event?.ctrlKey && !event?.metaKey) {
-      selection.clearSelection();
-      setSelectedFiles([]);
-    }
-  };
-
-  const onMove = ({
-    store: {
-      changed: { added, removed },
-    },
-  }: SelectionEvent) => {
-    const addedFiles = extractFiles(added, files);
-    const removedFiles = extractFiles(removed, files);
-
-    setSelectedFileIds((prevFileIds) => {
-      let fileIds = [...prevFileIds];
-
-      addedFiles.forEach((file) => {
-        if (!file) return;
-        const id = uuid.v4();
-        if (fileIds.includes(id)) return;
-        fileIds.push(id);
-      });
-
-      removedFiles.forEach((file) => {
-        const id = uuid.v4();
-        fileIds = fileIds.filter((s) => s !== id);
-      });
-
-      return fileIds;
-    });
-  };
-
-  const [highlightInlineDiff, setHighlightInlineDiff] = useState(true);
-
   useEffect(() => {
     getHighlighterCore({
       themes: [shikiTheme, tailwindLight, tailwindDark],
@@ -119,83 +94,23 @@ export function Code() {
   const [actionsOpen, setActionsOpen] = React.useState(false);
   const [isTouch, setIsTouch] = React.useState<boolean>();
 
-  // const handleDownload = React.useCallback(() => {
-  //   downloadData(selectedQuicklinks);
-  // }, [selectedQuicklinks]);
-
-  // const handleCopyData = React.useCallback(() => {
-  //   copyData(selectedQuicklinks);
-  //   toast.success("Copied to clipboard!");
-  // }, [selectedQuicklinks]);
-
-  // const handleCopyUrl = React.useCallback(async () => {
-  //   const url = makeUrl(selectedQuicklinks);
-  //   toast.promise(
-  //     shortenUrl(url, "quicklinks").then((urlToCopy) => {
-  //       if (urlToCopy === null) return null;
-
-  //       copy(urlToCopy);
-  //       return "Copied URL to clipboard!";
-  //     }),
-  //     {
-  //       loading: "Copying URL to clipboard...",
-  //       success: "Copied URL to clipboard!",
-  //       error: "Failed to copy URL to clipboard",
-  //     },
-  //   );
-  // }, [selectedQuicklinks]);
-
-  // const handleAddToRaycast = React.useCallback(
-  //   () => addToRaycast(router, selectedQuicklinks),
-  //   [router, selectedQuicklinks],
-  // );
-
   React.useEffect(() => {
     setIsTouch(isTouchDevice());
     setEnableViewObserver(true);
   }, [isTouch, setIsTouch, setEnableViewObserver]);
 
-  // React.useEffect(() => {
-  //   const down = (event: KeyboardEvent) => {
-  //     const { key, keyCode, metaKey, shiftKey, altKey } = event;
+  const selectAll = async () => {
+    setFlashMessage({ icon: <CheckListIcon />, message: "Selecting all files" });
 
-  //     if (key === "k" && metaKey) {
-  //       if (selectedQuicklinks.length === 0) return;
-  //       setActionsOpen((prevOpen) => {
-  //         return !prevOpen;
-  //       });
-  //     }
+    setSelectedFiles(filteredFiles.map((f) => f.name));
 
-  //     if (key === "d" && metaKey) {
-  //       if (selectedQuicklinks.length === 0) return;
-  //       event.preventDefault();
-  //       handleDownload();
-  //     }
+    setFlashShown(false);
+  };
 
-  //     if (key === "Enter" && metaKey) {
-  //       if (selectedQuicklinks.length === 0) return;
-  //       event.preventDefault();
-  //       handleAddToRaycast();
-  //     }
-
-  //     // key === "c" doesn't work when using alt key, so we use keCode instead (67)
-  //     if (keyCode === 67 && metaKey && altKey) {
-  //       if (selectedQuicklinks.length === 0) return;
-  //       event.preventDefault();
-  //       handleCopyData();
-  //       setActionsOpen(false);
-  //     }
-
-  //     if (key === "c" && metaKey && shiftKey) {
-  //       event.preventDefault();
-  //       handleCopyUrl();
-  //       setActionsOpen(false);
-  //     }
-  //   };
-
-  //   document.addEventListener("keydown", down);
-  //   return () => document.removeEventListener("keydown", down);
-  // }, [setActionsOpen, selectedQuicklinks, handleCopyData, handleDownload, handleCopyUrl, handleAddToRaycast]);
+  useHotkeys("ctrl+a,cmd+a", (event) => {
+    event.preventDefault();
+    selectAll();
+  });
 
   return (
     <FrameContextStore>
@@ -209,16 +124,14 @@ export function Code() {
         <div className={styles.sidebar}>
           <div className={styles.sidebarInner}>
             <ScrollArea>
-              <div
-                className={`${styles.sidebarContent} ${!currentFile?.name.endsWith(".patch") ? "justify-between" : ""}`}
-              >
+              <div className={cn(styles.sidebarContent, !currentFile?.name.endsWith(".patch") && "justify-between")}>
                 <div className={styles.sidebarNav}>
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 mb-6">
                     <Input
                       type="search"
                       placeholder="Search files…"
                       variant="soft"
-                      className="mb-6 flex"
+                      className="flex"
                       size="large"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
@@ -230,13 +143,25 @@ export function Code() {
                     <FileUpload onFilesSelected={handleFilesSelected} />
                   </div>
 
-                  {filteredFiles.length ? <p className={styles.sidebarTitle}>Files</p> : null}
+                  {filteredFiles.length ? (
+                    <div className="flex justify-between items-center mb-4">
+                      <p className={styles.sidebarTitle}>Files</p>
+                      <Button
+                        onClick={() => {
+                          const hasSelected = selectedFiles.length > 0;
+                          setSelectedFiles(hasSelected ? [] : filteredFiles.map((f) => f.name));
+                        }}
+                      >
+                        {selectedFiles.length > 0 ? "Clear selected" : "Select all"}
+                      </Button>
+                    </div>
+                  ) : null}
 
                   <div className="max-h-[500px] overflow-y-auto">
-                    {filteredFiles.map((file) => {
+                    {filteredFiles.map((file, index) => {
                       return (
                         <NavItem
-                          key={file.name}
+                          key={index}
                           file={file}
                           isActive={selectedFiles.includes(file.name)}
                           onSelect={(e) => {
@@ -314,7 +239,7 @@ export function Code() {
                     <div className={styles.summaryControls}>
                       <ExportButton />
 
-                      <Button onClick={() => setSelectedFiles([])}>Clear selected</Button>
+                      {/* <Button onClick={() => setSelectedFiles([])}>Clear selected</Button> */}
                     </div>
                   </div>
                 )}

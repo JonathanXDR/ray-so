@@ -144,7 +144,6 @@ const ExportButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = (p
     event.preventDefault();
     setDropdownOpen((open) => !open);
   });
-
   useHotkeys("ctrl+s,cmd+s", (event) => {
     event.preventDefault();
     savePng();

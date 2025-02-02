@@ -24,7 +24,7 @@ export default function FileUpload({ onFilesSelected, ...props }: { onFilesSelec
   }
 
   return (
-    <div className="flex flex-col gap-3 mb-3" {...props}>
+    <div className="flex flex-col gap-3" {...props}>
       <Button iconOnly size="large" title="Upload files" className="relative" disabled={uploading}>
         <input
           type="file"
