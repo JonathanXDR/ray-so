@@ -18,8 +18,8 @@ import {
   TrashIcon,
 } from "@raycast/icons";
 import { useAtom } from "jotai";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import path from "path";
+import { useEffect, useState } from "react";
 import { getHighlighterCore, Highlighter } from "shiki";
 import getWasm from "shiki/wasm";
 import tailwindDark from "./assets/tailwind/dark.json";
@@ -41,37 +41,27 @@ import { shikiTheme } from "./store/themes";
 import { isTouchDevice } from "./util/isTouchDevice";
 import { LANGUAGES } from "./util/languages";
 
-function extractFiles(elements: Element[], files: File[]): File[] {
-  const result: File[] = [];
-  for (const el of elements) {
-    const fileName = el.getAttribute("data-file-name");
-    if (!fileName) continue;
-    const found = files.find((f) => f.name === fileName);
-    if (found) result.push(found);
-  }
-  return result;
-}
-
 export function Code() {
   const [highlightInlineDiff, setHighlightInlineDiff] = useState(true);
+  const [search, setSearch] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [enableViewObserver, setEnableViewObserver] = useState(false);
+  const [isTouch, setIsTouch] = useState<boolean>();
+  const [highlighter, setHighlighter] = useAtom(highlighterAtom);
   const [, setFlashMessage] = useAtom(derivedFlashMessageAtom);
   const [, setFlashShown] = useAtom(flashShownAtom);
-  const [highlighter, setHighlighter] = useAtom(highlighterAtom);
-  const { files, currentFile, handleFilesSelected, handleChangeFile, removeFile, updateFile } = useFiles();
 
-  const [search, setSearch] = useState("");
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const { files, currentFile, handleFilesSelected, handleChangeFile, removeFile, updateFile } = useFiles();
+  const fileExtension = currentFile?.name ? path.extname(currentFile.name).slice(1) : undefined;
+  const filteredFiles = files.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
 
   useEffect(() => {
     if (selectedFiles.length === 1) {
-      const single = files.find((f) => f.name === selectedFiles[0]);
+      const single = files.find((f) => f.name === selectedFiles[0]?.name);
       if (single) handleChangeFile(single);
     }
   }, [selectedFiles, files, handleChangeFile]);
 
-  const filteredFiles = files.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
-
-  const [enableViewObserver, setEnableViewObserver] = useState(false);
   useSectionInViewObserver({ headerHeight: 50, enabled: enableViewObserver });
   useEffect(() => {
     setEnableViewObserver(true);
@@ -87,23 +77,14 @@ export function Code() {
     });
   }, []);
 
-  const [selectedFileIds, setSelectedFileIds] = React.useState<string[]>([]);
-
-  const router = useRouter();
-
-  const [actionsOpen, setActionsOpen] = React.useState(false);
-  const [isTouch, setIsTouch] = React.useState<boolean>();
-
-  React.useEffect(() => {
+  useEffect(() => {
     setIsTouch(isTouchDevice());
     setEnableViewObserver(true);
   }, [isTouch, setIsTouch, setEnableViewObserver]);
 
   const selectAll = async () => {
     setFlashMessage({ icon: <CheckListIcon />, message: "Selecting all files" });
-
-    setSelectedFiles(filteredFiles.map((f) => f.name));
-
+    setSelectedFiles(filteredFiles);
     setFlashShown(false);
   };
 
@@ -124,7 +105,7 @@ export function Code() {
         <div className={styles.sidebar}>
           <div className={styles.sidebarInner}>
             <ScrollArea>
-              <div className={cn(styles.sidebarContent, !currentFile?.name.endsWith(".patch") && "justify-between")}>
+              <div className={cn(styles.sidebarContent, fileExtension !== "patch" && "justify-between")}>
                 <div className={styles.sidebarNav}>
                   <div className="flex gap-3 mb-6">
                     <Input
@@ -149,7 +130,7 @@ export function Code() {
                       <Button
                         onClick={() => {
                           const hasSelected = selectedFiles.length > 0;
-                          setSelectedFiles(hasSelected ? [] : filteredFiles.map((f) => f.name));
+                          setSelectedFiles(hasSelected ? [] : filteredFiles);
                         }}
                       >
                         {selectedFiles.length > 0 ? "Clear selected" : "Select all"}
@@ -159,27 +140,13 @@ export function Code() {
 
                   <div className="max-h-[500px] overflow-y-auto">
                     {filteredFiles.map((file, index) => {
-                      return (
-                        <NavItem
-                          key={index}
-                          file={file}
-                          isActive={selectedFiles.includes(file.name)}
-                          onSelect={(e) => {
-                            e.preventDefault();
-
-                            setSelectedFiles((prev) => {
-                              return prev.includes(file.name)
-                                ? prev.filter((f) => f !== file.name)
-                                : [...prev, file.name];
-                            });
-                          }}
-                        />
-                      );
+                      const isSelected = selectedFiles.some((selectedFile) => selectedFile.name === file.name);
+                      return <NavItem key={index} file={file} data-selected={isSelected} />;
                     })}
                   </div>
                 </div>
 
-                {currentFile && currentFile.name.endsWith(".patch") && (
+                {fileExtension === "patch" && (
                   <>
                     <span className={styles.sidebarNavDivider}></span>
 
@@ -220,13 +187,13 @@ export function Code() {
                       </Collapsible.Trigger>
 
                       <Collapsible.Content className={styles.summaryContent}>
-                        {selectedFiles.map((fn) => (
-                          <div key={fn} className={styles.summaryItem}>
-                            {fn}
+                        {selectedFiles.map((file, index) => (
+                          <div key={index} className={styles.summaryItem}>
+                            {file.name}
                             <button
                               className={styles.summaryItemButton}
                               onClick={() => {
-                                setSelectedFiles((prev) => prev.filter((p) => p !== fn));
+                                setSelectedFiles((prev) => prev.filter((f) => f !== file));
                               }}
                             >
                               <TrashIcon />
@@ -259,23 +226,39 @@ export function Code() {
   );
 }
 
-function NavItem({
-  file,
-  isActive,
-  onSelect,
-}: {
-  file: File;
-  isActive: boolean;
-  onSelect: (e: React.MouseEvent<HTMLLIElement>) => void;
-}) {
+async function NavItem({ file }: { file: File }) {
   const activeSection = useSectionInView();
+  const fileExtension = path.extname(file.name).slice(1);
+
+  if (!fileExtension || !LANGUAGES[fileExtension]) {
+    return null;
+  }
+
+  const content = await file.text();
+
+  const params = new URLSearchParams();
+  params.set("title", file.name);
+  if (fileExtension) {
+    params.set("language", fileExtension);
+  }
+  if (content) {
+    params.set("code", content);
+  }
 
   return (
-    <li onClick={onSelect} className={styles.sidebarNavItem} data-active={isActive} data-file-name={file.name}>
+    <a
+      onClick={(e) => {
+        e.preventDefault();
+
+        window.history.pushState(null, "", `#${params.toString()}`);
+      }}
+      className={styles.sidebarNavItem}
+      data-active={activeSection === `#${params.toString()}`}
+    >
       <BlankDocumentIcon />
 
       <span className={styles.fileName}>{file.name}</span>
       <span className={styles.badge}>0</span>
-    </li>
+    </a>
   );
 }
