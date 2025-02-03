@@ -338,3 +338,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.selectableContainer {
+  max-height: 500px;
+  overflow-y: auto;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}

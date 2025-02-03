@@ -6,15 +6,15 @@ import { toast } from "@/components/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import { CircleProgressIcon, UploadIcon, XMarkTopRightSquareIcon } from "@raycast/icons";
 import React, { useState } from "react";
+import type { UserFile } from "../hooks/useFiles";
 
-export default function FileUpload({
-  files,
-  onFilesSelected,
-  ...props
-}: {
-  files: File[];
-  onFilesSelected: (files: File[]) => void;
-}) {
+type FileUploadProps = {
+  files: UserFile[];
+  onFilesSelected: (files: File[]) => Promise<void>;
+  onClearAll: () => void;
+};
+
+export default function FileUpload({ files, onFilesSelected, onClearAll }: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -34,7 +34,7 @@ export default function FileUpload({
   }
 
   return (
-    <div className="flex flex-col gap-3" {...props}>
+    <div className="flex flex-col gap-3">
       <Tooltip>
         <TooltipTrigger asChild>
           {files.length === 0 ? (
@@ -69,7 +69,13 @@ export default function FileUpload({
                       <Button variant="secondary" onClick={() => setIsOpen(false)}>
                         Cancel
                       </Button>
-                      <Button variant="primary" onClick={() => onFilesSelected([])}>
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          onClearAll();
+                          setIsOpen(false);
+                        }}
+                      >
                         Delete
                       </Button>
                     </div>

@@ -3,6 +3,7 @@ import { useAtom } from "jotai";
 import React, { MouseEventHandler, PropsWithChildren, useCallback, useRef, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 import XMarkIcon from "../assets/icons/x-mark-circle-filled-16.svg";
+import { UserFile } from "../hooks/useFiles";
 import { windowWidthAtom } from "../store";
 import { FileCarousel } from "./FileCarousel";
 import styles from "./ResizableFrame.module.css";
@@ -10,8 +11,8 @@ import styles from "./ResizableFrame.module.css";
 type Handle = "right" | "left";
 
 interface ResizableFrameProps extends PropsWithChildren {
-  files: File[];
-  onChangeFile: (file: File, index: number) => void;
+  files: UserFile[];
+  onChangeFile: (file: UserFile, index: number) => void;
 }
 
 let maxWidth = 920;

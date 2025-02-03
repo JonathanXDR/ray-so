@@ -3,19 +3,16 @@
 import { Button } from "@/components/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@raycast/icons";
 import { useState } from "react";
+import type { UserFile } from "../hooks/useFiles";
 
-export function FileCarousel({
-  children,
-  files,
-  onChangeFile,
-  showButtons,
-  ...props
-}: {
-  children?: React.ReactNode;
-  files: File[];
-  onChangeFile: (file: File, index: number) => void;
+interface FileCarouselProps extends React.HTMLAttributes<HTMLDivElement> {
+  files: UserFile[];
+  onChangeFile: (file: UserFile, index: number) => void;
   showButtons?: boolean;
-} & React.HTMLAttributes<HTMLDivElement>) {
+  children?: React.ReactNode;
+}
+
+export function FileCarousel({ children, files, onChangeFile, showButtons, ...props }: FileCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   function handleSelect(index: number) {

@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/button";
 import { Input, InputSlot } from "@/components/input";
 import { NavigationActions } from "@/components/navigation";
@@ -7,7 +8,7 @@ import { Switch } from "@/components/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import { cn } from "@/utils/cn";
 import useHotkeys from "@/utils/useHotkeys";
-import { useSectionInView, useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
+import { useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import {
   BlankDocumentIcon,
@@ -37,7 +38,7 @@ import Frame from "./components/Frame";
 import { InfoDialog } from "./components/InfoDialog";
 import NoSSR from "./components/NoSSR";
 import { UploadInstructions } from "./components/UploadInstructions";
-import { useFiles } from "./hooks/useFiles";
+import { useFiles, UserFile } from "./hooks/useFiles";
 import { highlighterAtom } from "./store";
 import { derivedFlashMessageAtom, flashShownAtom } from "./store/flash";
 import FrameContextStore from "./store/FrameContextStore";
@@ -48,70 +49,35 @@ import { LANGUAGES } from "./util/languages";
 export function Code() {
   const [highlightInlineDiff, setHighlightInlineDiff] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<UserFile[]>([]);
   const [enableViewObserver, setEnableViewObserver] = useState(false);
   const [isTouch, setIsTouch] = useState<boolean>();
   const [highlighter, setHighlighter] = useAtom(highlighterAtom);
   const [, setFlashMessage] = useAtom(derivedFlashMessageAtom);
   const [, setFlashShown] = useAtom(flashShownAtom);
 
-  const { files, currentFile, handleFilesSelected, handleChangeFile, removeFile, updateFile } = useFiles();
+  const { files, currentFile, handleFilesSelected, handleChangeFile, removeFile, updateFile, clearAllFiles } =
+    useFiles();
+
   const fileExtension = currentFile?.name ? path.extname(currentFile.name).slice(1) : undefined;
   const filteredFiles = files.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
 
-  const selectAll = async () => {
+  function selectAll() {
     setFlashMessage({ icon: <CheckListIcon />, message: "Selecting all files" });
     setSelectedFiles(filteredFiles);
     setFlashShown(false);
-  };
-
-  const onStart = ({ event, selection }: SelectionEvent) => {
-    if (!isTouch && !event?.ctrlKey && !event?.metaKey) {
-      selection.clearSelection();
-      setSelectedFiles([]);
-    }
-  };
-
-  const onMove = ({
-    store: {
-      changed: { added, removed },
-    },
-  }: SelectionEvent) => {
-    setSelectedFiles((prevFiles) => {
-      const files = [...prevFiles];
-
-      added.forEach((file) => {
-        if (!file) {
-          return;
-        }
-        if (files.find((f) => f.id === file.id)) {
-          return;
-        }
-        files.push(file);
-      });
-
-      removed.forEach((file) => {
-        return files.filter((s) => s?.id !== file?.id);
-      });
-
-      return files;
-    });
-  };
+  }
 
   useSectionInViewObserver({ headerHeight: 50, enabled: enableViewObserver });
 
   useEffect(() => {
     setEnableViewObserver(true);
+    setIsTouch(isTouchDevice());
   }, []);
 
   useEffect(() => {
-    setIsTouch(isTouchDevice());
-    setEnableViewObserver(true);
-  }, [isTouch, setIsTouch, setEnableViewObserver]);
-
-  useEffect(() => {
     if (selectedFiles.length === 1) {
-      const single = files.find((f) => f.name === selectedFiles[0]?.name);
+      const single = files.find((f) => f.id === selectedFiles[0].id);
       if (single) handleChangeFile(single);
     }
   }, [selectedFiles, files, handleChangeFile]);
@@ -124,12 +90,45 @@ export function Code() {
     }).then((loaded) => {
       setHighlighter(loaded as Highlighter);
     });
-  }, []);
+  }, [setHighlighter]);
 
   useHotkeys("ctrl+a,cmd+a", (event) => {
     event.preventDefault();
     selectAll();
   });
+
+  function onStart({ event, selection }: SelectionEvent) {
+    if (!isTouch && !event?.ctrlKey && !event?.metaKey) {
+      selection.clearSelection();
+      setSelectedFiles([]);
+    }
+  }
+  function onMove({
+    store: {
+      changed: { added, removed },
+    },
+  }: SelectionEvent) {
+    setSelectedFiles((prevFiles) => {
+      let newSelected = [...prevFiles];
+
+      added.forEach((elem) => {
+        const fileId = elem?.getAttribute?.("data-file-id");
+        if (!fileId) return;
+        const f = files.find((fi) => fi.id === fileId);
+        if (f && !newSelected.find((x) => x.id === f.id)) {
+          newSelected.push(f);
+        }
+      });
+
+      removed.forEach((elem) => {
+        const fileId = elem?.getAttribute?.("data-file-id");
+        if (!fileId) return;
+        newSelected = newSelected.filter((x) => x.id !== fileId);
+      });
+
+      return newSelected;
+    });
+  }
 
   return (
     <FrameContextStore>
@@ -159,10 +158,10 @@ export function Code() {
                         <MagnifyingGlassIcon className="w-3.5 h-3.5" />
                       </InputSlot>
                     </Input>
-                    <FileUpload files={files} onFilesSelected={handleFilesSelected} />
+                    <FileUpload files={files} onFilesSelected={handleFilesSelected} onClearAll={clearAllFiles} />
                   </div>
 
-                  {filteredFiles.length ? (
+                  {filteredFiles.length > 0 && (
                     <div className="flex justify-between items-center mb-4">
                       <p className={styles.sidebarTitle}>Files</p>
                       <Button
@@ -184,32 +183,43 @@ export function Code() {
                         )}
                       </Button>
                     </div>
-                  ) : null}
+                  )}
 
-                  <div className="max-h-[500px] overflow-y-auto">
-                    {isTouch !== null && (
-                      <SelectionArea
-                        className="pt-8"
-                        onStart={onStart}
-                        onMove={onMove}
-                        selectables=".selectable"
-                        features={{
-                          // Disable support for touch devices
-                          touch: isTouch ? false : true,
-                          range: true,
-                          singleTap: {
-                            allow: true,
-                            intersect: "native",
-                          },
-                        }}
-                      >
-                        {filteredFiles.map((file, index) => {
-                          const isSelected = selectedFiles.some((selectedFile) => selectedFile.name === file.name);
-                          return <NavItem key={index} file={file} data-selected={isSelected} />;
-                        })}
-                      </SelectionArea>
-                    )}
-                  </div>
+                  {filteredFiles.length > 0 && (
+                    <div className={styles.selectableContainer}>
+                      {isTouch !== null && (
+                        <SelectionArea
+                          className="pt-8"
+                          onStart={onStart}
+                          onMove={onMove}
+                          selectables=".selectable"
+                          features={{
+                            touch: isTouch ? false : true,
+                            range: true,
+                            singleTap: {
+                              allow: true,
+                              intersect: "native",
+                            },
+                          }}
+                        >
+                          {filteredFiles.map((file) => {
+                            const isSelected = selectedFiles.some((sf) => sf.id === file.id);
+                            return (
+                              <NavItem
+                                key={file.id}
+                                file={file}
+                                isSelected={isSelected}
+                                onClick={() => {
+                                  handleChangeFile(file);
+                                  setSelectedFiles([file]);
+                                }}
+                              />
+                            );
+                          })}
+                        </SelectionArea>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {fileExtension === "patch" && (
@@ -256,11 +266,13 @@ export function Code() {
                       <Collapsible.Content className={styles.summaryContent}>
                         {selectedFiles.map((file, index) => (
                           <div key={index} className={styles.summaryItem}>
-                            {file.name}
+                            {/* display: inline-block; overflow: hidden; max-width: 140px; text-overflow: ellipsis;
+                            white-space: nowrap; */}
+                            <p className="truncate max-w-[190px]">{file.name}</p>
                             <button
                               className={styles.summaryItemButton}
                               onClick={() => {
-                                setSelectedFiles((prev) => prev.filter((f) => f !== file));
+                                setSelectedFiles((prev) => prev.filter((f) => f.id !== file.id));
                               }}
                             >
                               <TrashIcon />
@@ -284,7 +296,14 @@ export function Code() {
 
         <div className={styles.app}>
           <NoSSR>
-            {highlighter && <Frame files={files} handleChangeFile={handleChangeFile} />}
+            {highlighter && (
+              <Frame
+                files={files}
+                currentFile={currentFile}
+                handleFilesSelected={handleFilesSelected}
+                handleChangeFile={handleChangeFile}
+              />
+            )}
             <Controls />
           </NoSSR>
         </div>
@@ -293,39 +312,25 @@ export function Code() {
   );
 }
 
-async function NavItem({ file }: { file: File }) {
-  const activeSection = useSectionInView();
-  const fileExtension = path.extname(file.name).slice(1);
-
-  if (!fileExtension || !LANGUAGES[fileExtension]) {
-    return null;
-  }
-
-  const content = await file.text();
-
-  const params = new URLSearchParams();
-  params.set("title", file.name);
-  if (fileExtension) {
-    params.set("language", fileExtension);
-  }
-  if (content) {
-    params.set("code", content);
-  }
-
+type NavItemProps = {
+  file: UserFile;
+  isSelected: boolean;
+  onClick: () => void;
+};
+function NavItem({ file, isSelected, onClick }: NavItemProps) {
   return (
-    <a
+    <div
+      className={cn("selectable", styles.sidebarNavItem)}
+      data-file-id={file.id}
+      data-active={isSelected || undefined}
       onClick={(e) => {
         e.preventDefault();
-
-        window.history.pushState(null, "", `#${params.toString()}`);
+        onClick();
       }}
-      className={styles.sidebarNavItem}
-      data-active={activeSection === `#${params.toString()}`}
     >
       <BlankDocumentIcon />
-
       <span className={styles.fileName}>{file.name}</span>
-      <span className={styles.badge}>0</span>
-    </a>
+      {/* For example a "badge"? <span className={styles.badge}>0</span> */}
+    </div>
   );
 }

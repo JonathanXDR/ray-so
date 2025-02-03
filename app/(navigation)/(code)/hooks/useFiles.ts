@@ -1,17 +1,49 @@
 "use client";
-import { useState } from "react";
+
+import { nanoid } from "nanoid";
+import { useEffect, useState } from "react";
+
+export interface UserFile {
+  id: string;
+  name: string;
+  content: string;
+  highlightDiff?: boolean;
+}
+
+const LOCAL_STORAGE_KEY = "raycast-user-files";
 
 export function useFiles() {
-  const [files, setFiles] = useState<File[]>([]);
-  const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<UserFile[]>([]);
+  const [currentFile, setCurrentFile] = useState<UserFile | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed: UserFile[] = JSON.parse(saved);
+        setFiles(parsed);
+        if (parsed.length > 0) setCurrentFile(parsed[0]);
+      } catch {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(files));
+  }, [files]);
 
   async function handleFilesSelected(selectedFiles: File[]) {
-    const processedFiles: File[] = [];
+    const newFiles: UserFile[] = [];
 
     for (const file of selectedFiles) {
       if (file.name.endsWith(".patch")) {
         const formData = new FormData();
         formData.append("patchFile", file);
+
         try {
           const res = await fetch("/api/diff", {
             method: "POST",
@@ -21,43 +53,71 @@ export function useFiles() {
             console.error("Error uploading .patch file", await res.text());
             continue;
           }
+
+          type DiffResult = {
+            fileName: string;
+            content: string;
+          };
+
           const data = await res.json();
 
-          const diffFiles: File[] = data.results.map((item: any) => {
-            const blob = new Blob([item.content || ""], { type: "text/plain" });
-            return new File([blob], item.fileName, { lastModified: Date.now() });
-          });
-          processedFiles.push(...diffFiles);
+          const diffFiles: UserFile[] = data.results.map((item: DiffResult) => ({
+            id: nanoid(),
+            name: item.fileName,
+            content: item.content || "",
+            highlightDiff: false,
+          }));
+
+          newFiles.push(...diffFiles);
         } catch (err) {
           console.error("Error forwarding .patch file:", err);
         }
       } else {
-        processedFiles.push(file);
+        const fileContent = await file.text();
+        newFiles.push({
+          id: nanoid(),
+          name: file.name,
+          content: fileContent,
+          highlightDiff: false,
+        });
       }
     }
 
-    setFiles(processedFiles);
-    if (processedFiles.length > 0) {
-      setCurrentFile(processedFiles[0]);
-    }
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem("files", JSON.stringify(processedFiles.map((f) => ({ name: f.name, size: f.size }))));
+    setFiles(newFiles);
+    if (newFiles.length > 0) {
+      setCurrentFile(newFiles[0]);
     }
   }
 
-  function handleChangeFile(file: File) {
+  function handleChangeFile(file: UserFile) {
     setCurrentFile(file);
   }
 
-  function removeFile(fileToRemove: File) {
-    setFiles((prev) => prev.filter((f) => f !== fileToRemove));
-    if (currentFile === fileToRemove) setCurrentFile(null);
+  function removeFile(fileToRemove: UserFile) {
+    setFiles((prev) => {
+      const updated = prev.filter((f) => f.id !== fileToRemove.id);
+      if (currentFile?.id === fileToRemove.id) {
+        return updated.length > 0 ? updated : [];
+      }
+      return updated;
+    });
+
+    if (currentFile?.id === fileToRemove.id) {
+      setCurrentFile(null);
+    }
   }
 
-  function updateFile(updatedFile: File) {
-    setFiles((prev) => prev.map((f) => (f === updatedFile ? updatedFile : f)));
-    if (currentFile === updatedFile) setCurrentFile(updatedFile);
+  function updateFile(updated: UserFile) {
+    setFiles((prev) => prev.map((f) => (f.id === updated.id ? updated : f)));
+    if (currentFile?.id === updated.id) {
+      setCurrentFile(updated);
+    }
+  }
+
+  function clearAllFiles() {
+    setFiles([]);
+    setCurrentFile(null);
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
   }
 
   return {
@@ -67,5 +127,6 @@ export function useFiles() {
     handleChangeFile,
     removeFile,
     updateFile,
+    clearAllFiles,
   };
 }

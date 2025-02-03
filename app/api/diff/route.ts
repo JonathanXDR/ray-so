@@ -15,21 +15,30 @@ export async function POST(req: NextRequest) {
     const parsed = gitDiffParser.parse(diffText);
 
     const results = parsed.map((file) => {
-      const { oldPath, newPath } = file;
+      // Remove any leading "b/" from the newPath
+      const cleaned = file.newPath.replace(/^b\//, "");
 
-      const cleanedNewPath = newPath.replace(/^b\//, "");
-      const cleanedOldPath = oldPath.replace(/^a\//, "");
+      let newContent = "";
 
-      const pathParts = cleanedNewPath.split("/");
-      const fileName = pathParts.pop() || "unknown";
-      const directory = pathParts.join("/");
+      // Iterate over the hunks, then over each change
+      for (const hunk of file.hunks) {
+        for (const change of hunk.changes) {
+          // Only collect inserted lines (type === "insert")
+          if (change.type === "insert") {
+            // Optionally remove the leading "+"
+            newContent += change.content.replace(/^\+/, "") + "\n";
+          }
+        }
+      }
+
+      // If no inserted lines, optionally store some placeholder
+      if (!newContent.trim()) {
+        newContent = `/* No new lines for ${cleaned} */`;
+      }
 
       return {
-        oldPath: cleanedOldPath,
-        newPath: cleanedNewPath,
-        directory,
-        fileName,
-        ...parsed,
+        fileName: cleaned || "unknown.patch",
+        content: newContent,
       };
     });
 
