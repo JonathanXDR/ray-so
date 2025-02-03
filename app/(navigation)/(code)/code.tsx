@@ -370,9 +370,9 @@ function NavItem({ file, isSelected, onClick }: NavItemProps) {
 
       <span
         className={cn(styles.badge, {
-          "text-badge-green bg-badge-green/15": file.type === "add",
-          "text-badge-red bg-badge-red/15": file.type === "delete",
-          "text-badge-blue bg-badge-blue/15": file.type !== "add" && file.type !== "delete",
+          "text-green bg-green/15": file.type === "add",
+          "text-red bg-red/15": file.type === "delete",
+          "text-blue bg-blue/15": file.type !== "add" && file.type !== "delete",
         })}
       >
         {/* Show a sign according to the file type */}
