@@ -50,6 +50,7 @@
     "jotai": "^2.8.3",
     "jotai-location": "^0.5.5",
     "js-base64": "^3.7.7",
+    "jszip": "^3.10.1",
     "lodash.debounce": "^4.0.8",
     "nanoid": "^5.0.9",
     "next": "14.2.3",
@@ -61,8 +62,7 @@
     "shiki": "^1.0.0",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.3.0",
-    "url-loader": "^4.1.1",
-    "uuid": "^11.0.5"
+    "url-loader": "^4.1.1"
   },
   "devDependencies": {
     "@svgr/webpack": "^6.4.0",
