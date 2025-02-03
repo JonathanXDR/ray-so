@@ -19,6 +19,7 @@ import {
   MagnifyingGlassIcon,
   TrashIcon,
 } from "@raycast/icons";
+import SelectionArea, { SelectionEvent } from "@viselect/react";
 import { useAtom } from "jotai";
 import path from "path";
 import { useEffect, useState } from "react";
@@ -58,17 +59,62 @@ export function Code() {
   const fileExtension = currentFile?.name ? path.extname(currentFile.name).slice(1) : undefined;
   const filteredFiles = files.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
 
+  const selectAll = async () => {
+    setFlashMessage({ icon: <CheckListIcon />, message: "Selecting all files" });
+    setSelectedFiles(filteredFiles);
+    setFlashShown(false);
+  };
+
+  const onStart = ({ event, selection }: SelectionEvent) => {
+    if (!isTouch && !event?.ctrlKey && !event?.metaKey) {
+      selection.clearSelection();
+      setSelectedFiles([]);
+    }
+  };
+
+  const onMove = ({
+    store: {
+      changed: { added, removed },
+    },
+  }: SelectionEvent) => {
+    setSelectedFiles((prevFiles) => {
+      const files = [...prevFiles];
+
+      added.forEach((file) => {
+        if (!file) {
+          return;
+        }
+        if (files.find((f) => f.id === file.id)) {
+          return;
+        }
+        files.push(file);
+      });
+
+      removed.forEach((file) => {
+        return files.filter((s) => s?.id !== file?.id);
+      });
+
+      return files;
+    });
+  };
+
+  useSectionInViewObserver({ headerHeight: 50, enabled: enableViewObserver });
+
+  useEffect(() => {
+    setEnableViewObserver(true);
+  }, []);
+
+  useEffect(() => {
+    setIsTouch(isTouchDevice());
+    setEnableViewObserver(true);
+  }, [isTouch, setIsTouch, setEnableViewObserver]);
+
   useEffect(() => {
     if (selectedFiles.length === 1) {
       const single = files.find((f) => f.name === selectedFiles[0]?.name);
       if (single) handleChangeFile(single);
     }
   }, [selectedFiles, files, handleChangeFile]);
-
-  useSectionInViewObserver({ headerHeight: 50, enabled: enableViewObserver });
-  useEffect(() => {
-    setEnableViewObserver(true);
-  }, []);
 
   useEffect(() => {
     getHighlighterCore({
@@ -79,17 +125,6 @@ export function Code() {
       setHighlighter(loaded as Highlighter);
     });
   }, []);
-
-  useEffect(() => {
-    setIsTouch(isTouchDevice());
-    setEnableViewObserver(true);
-  }, [isTouch, setIsTouch, setEnableViewObserver]);
-
-  const selectAll = async () => {
-    setFlashMessage({ icon: <CheckListIcon />, message: "Selecting all files" });
-    setSelectedFiles(filteredFiles);
-    setFlashShown(false);
-  };
 
   useHotkeys("ctrl+a,cmd+a", (event) => {
     event.preventDefault();
@@ -152,10 +187,28 @@ export function Code() {
                   ) : null}
 
                   <div className="max-h-[500px] overflow-y-auto">
-                    {filteredFiles.map((file, index) => {
-                      const isSelected = selectedFiles.some((selectedFile) => selectedFile.name === file.name);
-                      return <NavItem key={index} file={file} data-selected={isSelected} />;
-                    })}
+                    {isTouch !== null && (
+                      <SelectionArea
+                        className="pt-8"
+                        onStart={onStart}
+                        onMove={onMove}
+                        selectables=".selectable"
+                        features={{
+                          // Disable support for touch devices
+                          touch: isTouch ? false : true,
+                          range: true,
+                          singleTap: {
+                            allow: true,
+                            intersect: "native",
+                          },
+                        }}
+                      >
+                        {filteredFiles.map((file, index) => {
+                          const isSelected = selectedFiles.some((selectedFile) => selectedFile.name === file.name);
+                          return <NavItem key={index} file={file} data-selected={isSelected} />;
+                        })}
+                      </SelectionArea>
+                    )}
                   </div>
                 </div>
 
