@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/dialog";
 import { toast } from "@/components/toast";
@@ -11,7 +9,7 @@ import { LANGUAGES } from "../util/languages";
 
 type FileUploadProps = {
   files: UserFile[];
-  onFilesSelected: (files: UserFile[]) => Promise<void>;
+  onFilesSelected: (files: File[]) => Promise<void>;
   onClearAll: () => void;
 };
 
@@ -22,10 +20,12 @@ export default function FileUpload({ files, onFilesSelected, onClearAll }: FileU
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const fileList = e.target.files;
     if (!fileList || fileList.length === 0) return;
+
     setUploading(true);
     try {
-      const filesArray = Array.from(fileList).map((file) => file as unknown as UserFile);
+      const filesArray = Array.from(fileList);
       await onFilesSelected(filesArray);
+      toast.success(`Successfully uploaded ${filesArray.length} file(s)`);
     } catch (error: any) {
       console.error("Error uploading file:", error);
       toast.error(error.message || "Error uploading file");
@@ -44,7 +44,7 @@ export default function FileUpload({ files, onFilesSelected, onClearAll }: FileU
                 type="file"
                 className="absolute top-0 right-0 bottom-0 left-0 cursor-pointer opacity-0"
                 accept={Object.values(LANGUAGES)
-                  .flatMap((lang) => lang.extensions)
+                  .flatMap((lang) => lang.extensions || [])
                   .map((ext) => `.${ext}`)
                   .join(",")}
                 onChange={handleFileChange}
@@ -78,6 +78,7 @@ export default function FileUpload({ files, onFilesSelected, onClearAll }: FileU
                         onClick={() => {
                           onClearAll();
                           setIsOpen(false);
+                          toast.success("All files removed");
                         }}
                       >
                         Delete

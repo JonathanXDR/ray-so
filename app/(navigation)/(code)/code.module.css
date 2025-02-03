@@ -334,7 +334,6 @@
 .fileName {
   display: inline-block;
   overflow: hidden;
-  max-width: 140px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

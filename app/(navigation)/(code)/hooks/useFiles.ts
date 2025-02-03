@@ -1,5 +1,3 @@
-"use client";
-
 import { File as BufferFile } from "buffer";
 import { File as DiffFile } from "gitdiff-parser";
 import { Base64 } from "js-base64";
@@ -17,33 +15,37 @@ export type UserFile = Partial<BufferFile> &
 
 const LOCAL_STORAGE_KEY = "raycast-user-files";
 
-function reconstructFullFileContent(file: any) {
+function reconstructFullFileContent(file: UserFile) {
   if (file.type === "delete") {
     return "/* This file was deleted by the patch */";
   }
 
-  const lines: string[] = [];
+  if (file.hunks && file.hunks.length > 0) {
+    const lines: string[] = [];
 
-  for (const hunk of file.hunks) {
-    let newLineIndex = hunk.newStart;
+    for (const hunk of file.hunks) {
+      let newLineIndex = hunk.newStart;
 
-    for (const change of hunk.changes) {
-      if (change.type === "normal" || change.type === "insert") {
-        let lineText = change.content;
-        if (lineText.startsWith("+") || lineText.startsWith(" ")) {
-          lineText = lineText.substring(1);
+      for (const change of hunk.changes) {
+        if (change.type === "normal" || change.type === "insert") {
+          let lineText = change.content;
+          if (lineText.startsWith("+") || lineText.startsWith(" ")) {
+            lineText = lineText.substring(1);
+          }
+          lines.push(lineText);
+          newLineIndex++;
         }
-        lines.push(lineText);
-        newLineIndex++;
       }
     }
+
+    if (lines.length === 0) {
+      return "/* No new lines or the patch is empty for this file */";
+    }
+
+    return lines.join("\n");
   }
 
-  if (lines.length === 0) {
-    return "/* No new lines or the patch is empty for this file */";
-  }
-
-  return lines.join("\n");
+  return file.content || "";
 }
 
 function saveFilesToStorage(files: UserFile[]) {
@@ -76,7 +78,6 @@ function loadFilesFromStorage(): UserFile[] {
     const decodedFiles = parsed.map((file) => ({
       ...file,
       content: Base64.decode(file.content),
-      hunks: file.hunks || [],
     }));
 
     console.log("Loaded files from localStorage:", decodedFiles);
@@ -113,19 +114,20 @@ export function useFiles() {
     setHasPatch(files.some((f) => f.isFromPatch));
   }, [files, initialized]);
 
-  const handleFilesSelected = useCallback(async (selectedFiles: UserFile[]) => {
+  const handleFilesSelected = useCallback(async (selectedFiles: File[]) => {
     const newFiles: UserFile[] = [];
 
     for (const file of selectedFiles) {
       if (file.name.endsWith(".patch")) {
         const formData = new FormData();
-        formData.append("patchFile", file as unknown as Blob);
+        formData.append("patchFile", file);
 
         try {
           const res = await fetch("/api/diff", {
             method: "POST",
             body: formData,
           });
+
           if (!res.ok) {
             console.error("Error uploading .patch file", await res.text());
             continue;
@@ -136,7 +138,6 @@ export function useFiles() {
             ...item,
             id: nanoid(),
             isFromPatch: true,
-            hunks: item.hunks || [],
           }));
 
           newFiles.push(...diffFiles);
@@ -145,13 +146,12 @@ export function useFiles() {
         }
       } else {
         try {
-          const fileContent = (await file?.text?.()) ?? "";
+          const fileContent = await file.text();
           newFiles.push({
-            ...file,
+            name: file.name,
             id: nanoid(),
             content: fileContent,
             isFromPatch: false,
-            hunks: [],
           });
         } catch (err) {
           console.error("Error reading file content:", err);

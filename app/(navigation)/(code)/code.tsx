@@ -204,24 +204,26 @@ export function Code() {
                   {filteredFiles.length > 0 && (
                     <div className="flex justify-between items-center mb-4">
                       <p className={styles.sidebarTitle}>Files</p>
-                      <Button
-                        onClick={() => {
-                          const hasSelected = selectedFiles.length > 0;
-                          setSelectedFiles(hasSelected ? [] : filteredFiles);
-                        }}
-                      >
-                        {selectedFiles.length > 0 ? (
-                          <>
-                            <EyeDisabledIcon />
-                            Clear selected
-                          </>
-                        ) : (
-                          <>
-                            <EyeIcon />
-                            Select all
-                          </>
-                        )}
-                      </Button>
+                      {files.length > 1 && (
+                        <Button
+                          onClick={() => {
+                            const hasSelected = selectedFiles.length > 1;
+                            setSelectedFiles(hasSelected ? [] : filteredFiles);
+                          }}
+                        >
+                          {selectedFiles.length > 1 ? (
+                            <>
+                              <EyeDisabledIcon />
+                              Clear selected
+                            </>
+                          ) : (
+                            <>
+                              <EyeIcon />
+                              Select all
+                            </>
+                          )}
+                        </Button>
+                      )}
                     </div>
                   )}
 
@@ -229,7 +231,6 @@ export function Code() {
                     <div className={styles.selectableContainer}>
                       {isTouch !== null && (
                         <SelectionArea
-                          className="pt-8"
                           onStart={onStart}
                           onMove={onMove}
                           selectables=".selectable"
@@ -366,21 +367,30 @@ function NavItem({ file, isSelected, onClick }: NavItemProps) {
       {file.type === "delete" && <DeleteDocumentIcon className="min-w-4" />}
       {file.type !== "add" && file.type !== "delete" && <BlankDocumentIcon className="min-w-4" />}
 
-      <span className={styles.fileName}>{file.name}</span>
-
       <span
-        className={cn(styles.badge, {
-          "text-green bg-green/15": file.type === "add",
-          "text-red bg-red/15": file.type === "delete",
-          "text-blue bg-blue/15": file.type !== "add" && file.type !== "delete",
+        className={cn(styles.fileName, {
+          "max-w-[140px]": file.hunks && file.type,
+          "max-w-[190px]": !file.hunks || !file.type,
         })}
       >
-        {/* Show a sign according to the file type */}
-        {file.type === "add" && "+"}
-        {file.type === "delete" && "-"}
-        {file.type !== "add" && file.type !== "delete" && "~"}
-        {file.hunks?.map((h) => h.changes.length).reduce((a, b) => a + b, 0)}
+        {file.name}
       </span>
+
+      {file.hunks && file.type && (
+        <span
+          className={cn(styles.badge, {
+            "text-green bg-green/15": file.type === "add",
+            "text-red bg-red/15": file.type === "delete",
+            "text-blue bg-blue/15": file.type !== "add" && file.type !== "delete",
+          })}
+        >
+          {/* Show a sign according to the file type */}
+          {file.type === "add" && "+"}
+          {file.type === "delete" && "-"}
+          {file.type !== "add" && file.type !== "delete" && "~"}
+          {file.hunks.map((h) => h.changes.length).reduce((a, b) => a + b, 0)}
+        </span>
+      )}
     </div>
   );
 }
