@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import { CircleProgressIcon, UploadIcon, XMarkTopRightSquareIcon } from "@raycast/icons";
 import React, { useState } from "react";
 import type { UserFile } from "../hooks/useFiles";
+import { LANGUAGES } from "../util/languages";
 
 type FileUploadProps = {
   files: UserFile[];
@@ -42,7 +43,10 @@ export default function FileUpload({ files, onFilesSelected, onClearAll }: FileU
               <input
                 type="file"
                 className="absolute top-0 right-0 bottom-0 left-0 cursor-pointer opacity-0"
-                accept="*"
+                accept={Object.values(LANGUAGES)
+                  .flatMap((lang) => lang.extensions)
+                  .map((ext) => `.${ext}`)
+                  .join(",")}
                 onChange={handleFileChange}
                 disabled={uploading}
                 multiple
