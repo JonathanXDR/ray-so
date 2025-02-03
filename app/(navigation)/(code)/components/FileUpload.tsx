@@ -2,10 +2,18 @@
 
 import { Button } from "@/components/button";
 import { toast } from "@/components/toast";
-import { CircleProgressIcon, UploadIcon } from "@raycast/icons";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
+import { CircleProgressIcon, UploadIcon, XMarkTopRightSquareIcon } from "@raycast/icons";
 import React, { useState } from "react";
 
-export default function FileUpload({ onFilesSelected, ...props }: { onFilesSelected: (files: File[]) => void }) {
+export default function FileUpload({
+  files,
+  onFilesSelected,
+  ...props
+}: {
+  files: File[];
+  onFilesSelected: (files: File[]) => void;
+}) {
   const [uploading, setUploading] = useState(false);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -25,17 +33,32 @@ export default function FileUpload({ onFilesSelected, ...props }: { onFilesSelec
 
   return (
     <div className="flex flex-col gap-3" {...props}>
-      <Button iconOnly size="large" title="Upload files" className="relative" disabled={uploading}>
-        <input
-          type="file"
-          className="absolute top-0 right-0 bottom-0 left-0 cursor-pointer opacity-0"
-          accept="*"
-          onChange={handleFileChange}
-          disabled={uploading}
-          multiple
-        />
-        {!uploading ? <UploadIcon className="!w-4 !h-4" /> : <CircleProgressIcon className="animate-spin" />}
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {files.length === 0 ? (
+            <Button iconOnly size="large" className="relative" disabled={uploading}>
+              <input
+                type="file"
+                className="absolute top-0 right-0 bottom-0 left-0 cursor-pointer opacity-0"
+                accept="*"
+                onChange={handleFileChange}
+                disabled={uploading}
+                multiple
+              />
+              {!uploading ? (
+                <UploadIcon className="!w-4 !h-4" />
+              ) : (
+                <CircleProgressIcon className="!w-4 !h-4 animate-spin" />
+              )}
+            </Button>
+          ) : (
+            <Button iconOnly size="large" className="relative" disabled={uploading}>
+              <XMarkTopRightSquareIcon className="!w-4 !h-4" />
+            </Button>
+          )}
+        </TooltipTrigger>
+        <TooltipContent>{files.length === 0 ? "Upload files" : "Remove files"}</TooltipContent>
+      </Tooltip>
     </div>
   );
 }

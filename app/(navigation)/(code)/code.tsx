@@ -13,6 +13,8 @@ import {
   BlankDocumentIcon,
   CheckListIcon,
   ChevronDownIcon,
+  EyeDisabledIcon,
+  EyeIcon,
   Info01Icon,
   MagnifyingGlassIcon,
   TrashIcon,
@@ -121,7 +123,7 @@ export function Code() {
                         <MagnifyingGlassIcon className="w-3.5 h-3.5" />
                       </InputSlot>
                     </Input>
-                    <FileUpload onFilesSelected={handleFilesSelected} />
+                    <FileUpload files={files} onFilesSelected={handleFilesSelected} />
                   </div>
 
                   {filteredFiles.length ? (
@@ -133,7 +135,17 @@ export function Code() {
                           setSelectedFiles(hasSelected ? [] : filteredFiles);
                         }}
                       >
-                        {selectedFiles.length > 0 ? "Clear selected" : "Select all"}
+                        {selectedFiles.length > 0 ? (
+                          <>
+                            <EyeDisabledIcon />
+                            Clear selected
+                          </>
+                        ) : (
+                          <>
+                            <EyeIcon />
+                            Select all
+                          </>
+                        )}
                       </Button>
                     </div>
                   ) : null}
