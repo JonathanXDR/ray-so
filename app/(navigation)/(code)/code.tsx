@@ -239,7 +239,7 @@ export function Code() {
                 )}
 
                 {files.length < 1 && <UploadInstructions />}
-                {files.length > 0 && <DownloadInstructions />}
+                {files.length > 0 && !(selectedFiles.length > 1) && <DownloadInstructions />}
 
                 {selectedFiles.length > 1 && (
                   <div>

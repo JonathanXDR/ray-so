@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/button";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/dialog";
 import { toast } from "@/components/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import { CircleProgressIcon, UploadIcon, XMarkTopRightSquareIcon } from "@raycast/icons";
@@ -15,6 +16,7 @@ export default function FileUpload({
   onFilesSelected: (files: File[]) => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const fileList = e.target.files;
@@ -52,9 +54,29 @@ export default function FileUpload({
               )}
             </Button>
           ) : (
-            <Button iconOnly size="large" className="relative" disabled={uploading}>
-              <XMarkTopRightSquareIcon className="!w-4 !h-4" />
-            </Button>
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogTrigger asChild>
+                <Button iconOnly size="large" className="relative" disabled={uploading}>
+                  <XMarkTopRightSquareIcon className="!w-4 !h-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent size="small">
+                <div className="flex gap-8">
+                  <div className="flex flex-col gap-3 flex-1 text-[13px] text-gray-11 leading-relaxed">
+                    <DialogTitle>Delete files?</DialogTitle>
+                    <p>Are you sure you want to delete all files?</p>
+                    <div className="flex justify-end gap-3 mt-3">
+                      <Button variant="secondary" onClick={() => setIsOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button variant="primary" onClick={() => onFilesSelected([])}>
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           )}
         </TooltipTrigger>
         <TooltipContent>{files.length === 0 ? "Upload files" : "Remove files"}</TooltipContent>
