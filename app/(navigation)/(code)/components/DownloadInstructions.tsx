@@ -1,8 +1,8 @@
 import { BlankDocumentIcon } from "@raycast/icons";
+import styles from "./DownloadInstructions.module.css";
 import ExportButton from "./ExportButton";
-import styles from "./Instructions.module.css";
 
-export function Instructions() {
+export function DownloadInstructions() {
   return (
     <div className={styles.root}>
       <div className={styles.skeletons}>

@@ -28,13 +28,14 @@ import tailwindDark from "./assets/tailwind/dark.json";
 import tailwindLight from "./assets/tailwind/light.json";
 import styles from "./code.module.css";
 import Controls from "./components/Controls";
+import { DownloadInstructions } from "./components/DownloadInstructions";
 import ExportButton from "./components/ExportButton";
 import FileUpload from "./components/FileUpload";
 import FormatButton from "./components/FormatCodeButton";
 import Frame from "./components/Frame";
 import { InfoDialog } from "./components/InfoDialog";
-import { Instructions } from "./components/Instructions";
 import NoSSR from "./components/NoSSR";
+import { UploadInstructions } from "./components/UploadInstructions";
 import { useFiles } from "./hooks/useFiles";
 import { highlighterAtom } from "./store";
 import { derivedFlashMessageAtom, flashShownAtom } from "./store/flash";
@@ -184,7 +185,8 @@ export function Code() {
                   </>
                 )}
 
-                {!(selectedFiles.length > 1) && <Instructions />}
+                {files.length < 1 && <UploadInstructions />}
+                {files.length > 0 && <DownloadInstructions />}
 
                 {selectedFiles.length > 1 && (
                   <div>
