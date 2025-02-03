@@ -379,7 +379,7 @@ function NavItem({ file, isSelected, onClick }: NavItemProps) {
         {file.type === "add" && "+"}
         {file.type === "delete" && "-"}
         {file.type !== "add" && file.type !== "delete" && "~"}
-        {file.hunks.map((h) => h.changes.length).reduce((a, b) => a + b, 0)}
+        {file.hunks?.map((h) => h.changes.length).reduce((a, b) => a + b, 0)}
       </span>
     </div>
   );

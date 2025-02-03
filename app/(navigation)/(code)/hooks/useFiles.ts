@@ -5,10 +5,10 @@ import { File as DiffFile } from "gitdiff-parser";
 import { Base64 } from "js-base64";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export type UserFile = Partial<BufferFile> &
-  DiffFile & {
+  Partial<DiffFile> & {
     name: string;
     id: string;
     content: string;
@@ -18,7 +18,9 @@ export type UserFile = Partial<BufferFile> &
 const LOCAL_STORAGE_KEY = "raycast-user-files";
 
 function reconstructFullFileContent(file: any) {
-  // if the file was deleted, we can skip it unless the highlight option is enabled. In that case, we can return the full content but highlighted as deleted.
+  if (file.type === "delete") {
+    return "/* This file was deleted by the patch */";
+  }
 
   const lines: string[] = [];
 
@@ -26,14 +28,13 @@ function reconstructFullFileContent(file: any) {
     let newLineIndex = hunk.newStart;
 
     for (const change of hunk.changes) {
-      if (change.type === "insert" || change.type === "normal") {
+      if (change.type === "normal" || change.type === "insert") {
         let lineText = change.content;
         if (lineText.startsWith("+") || lineText.startsWith(" ")) {
           lineText = lineText.substring(1);
         }
         lines.push(lineText);
         newLineIndex++;
-      } else {
       }
     }
   }
@@ -45,48 +46,74 @@ function reconstructFullFileContent(file: any) {
   return lines.join("\n");
 }
 
+function saveFilesToStorage(files: UserFile[]) {
+  try {
+    const encodedFiles = files.map((file) => ({
+      ...file,
+      content: Base64.encode(file.content),
+    }));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(encodedFiles));
+    console.log("Saved files to localStorage:", encodedFiles);
+  } catch (error) {
+    console.error("Error saving files to localStorage:", error);
+  }
+}
+
+function loadFilesFromStorage(): UserFile[] {
+  try {
+    const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!savedData) {
+      console.log("No saved files found in localStorage");
+      return [];
+    }
+
+    const parsed = JSON.parse(savedData);
+    if (!Array.isArray(parsed)) {
+      console.error("Saved data is not an array:", parsed);
+      return [];
+    }
+
+    const decodedFiles = parsed.map((file) => ({
+      ...file,
+      content: Base64.decode(file.content),
+      hunks: file.hunks || [],
+    }));
+
+    console.log("Loaded files from localStorage:", decodedFiles);
+    return decodedFiles;
+  } catch (error) {
+    console.error("Error loading files from localStorage:", error);
+    return [];
+  }
+}
+
 export function useFiles() {
   const [files, setFiles] = useState<UserFile[]>([]);
   const [currentFile, setCurrentFile] = useState<UserFile | null>(null);
   const [hasPatch, setHasPatch] = useState(false);
-
+  const [initialized, setInitialized] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || initialized) return;
 
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (saved) {
-      try {
-        let parsed: UserFile[] = JSON.parse(saved);
-        parsed = parsed.map((f) => ({
-          ...f,
-          content: Base64.decode(f.content),
-        }));
-        setFiles(parsed);
-        if (parsed.length > 0) {
-          setCurrentFile(parsed[0]);
-          setHasPatch(parsed.some((f) => f.isFromPatch));
-        }
-      } catch {
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
-      }
+    const loadedFiles = loadFilesFromStorage();
+    if (loadedFiles.length > 0) {
+      setFiles(loadedFiles);
+      setCurrentFile(loadedFiles[0]);
+      setHasPatch(loadedFiles.some((f) => f.isFromPatch));
     }
-  }, []);
+    setInitialized(true);
+  }, [initialized]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !initialized) return;
 
-    const encodedFiles = files.map((f) => ({
-      ...f,
-      content: Base64.encodeURI(f.content),
-    }));
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(encodedFiles));
-
+    saveFilesToStorage(files);
     setHasPatch(files.some((f) => f.isFromPatch));
-  }, [files]);
+  }, [files, initialized]);
 
-  async function handleFilesSelected(selectedFiles: UserFile[]) {
+  const handleFilesSelected = useCallback(async (selectedFiles: UserFile[]) => {
     const newFiles: UserFile[] = [];
 
     for (const file of selectedFiles) {
@@ -105,76 +132,91 @@ export function useFiles() {
           }
 
           const data = await res.json();
-
-          const diffFiles: UserFile[] = data.results.map((item: UserFile) => {
-            return {
-              ...item,
-              id: nanoid(),
-              isFromPatch: true,
-            };
-          });
+          const diffFiles: UserFile[] = data.results.map((item: UserFile) => ({
+            ...item,
+            id: nanoid(),
+            isFromPatch: true,
+            hunks: item.hunks || [],
+          }));
 
           newFiles.push(...diffFiles);
         } catch (err) {
           console.error("Error forwarding .patch file:", err);
         }
       } else {
-        const fileContent = (await file?.text?.()) ?? "";
-        newFiles.push({
-          ...file,
-          id: nanoid(),
-          content: fileContent,
-          isFromPatch: false,
-        });
+        try {
+          const fileContent = (await file?.text?.()) ?? "";
+          newFiles.push({
+            ...file,
+            id: nanoid(),
+            content: fileContent,
+            isFromPatch: false,
+            hunks: [],
+          });
+        } catch (err) {
+          console.error("Error reading file content:", err);
+        }
       }
     }
 
-    setFiles((prev) => {
-      const merged = [...prev, ...newFiles];
+    setFiles((prevFiles) => {
+      const merged = [...prevFiles, ...newFiles];
+      saveFilesToStorage(merged);
       return merged;
     });
 
     if (newFiles.length > 0) {
       selectFile(newFiles[0]);
     }
-  }
+  }, []);
 
-  function selectFile(file: UserFile) {
+  const selectFile = useCallback((file: UserFile) => {
     setCurrentFile(file);
-  }
+  }, []);
 
-  function handleChangeFile(file: UserFile) {
-    selectFile(file);
-  }
+  const handleChangeFile = useCallback(
+    (file: UserFile) => {
+      selectFile(file);
+    },
+    [selectFile],
+  );
 
-  function removeFile(fileToRemove: UserFile) {
-    setFiles((prev) => {
-      const updated = prev.filter((f) => f.id !== fileToRemove.id);
+  const removeFile = useCallback(
+    (fileToRemove: UserFile) => {
+      setFiles((prevFiles) => {
+        const updated = prevFiles.filter((f) => f.id !== fileToRemove.id);
+        saveFilesToStorage(updated);
+        return updated;
+      });
 
       if (currentFile?.id === fileToRemove.id) {
-        return updated;
+        setCurrentFile(null);
       }
-      return updated;
-    });
+    },
+    [currentFile?.id],
+  );
 
-    if (currentFile?.id === fileToRemove.id) {
-      setCurrentFile(null);
-    }
-  }
+  const updateFile = useCallback(
+    (updated: UserFile) => {
+      setFiles((prevFiles) => {
+        const newFiles = prevFiles.map((f) => (f.id === updated.id ? updated : f));
+        saveFilesToStorage(newFiles);
+        return newFiles;
+      });
 
-  function updateFile(updated: UserFile) {
-    setFiles((prev) => prev.map((f) => (f.id === updated.id ? updated : f)));
-    if (currentFile?.id === updated.id) {
-      setCurrentFile(updated);
-    }
-  }
+      if (currentFile?.id === updated.id) {
+        setCurrentFile(updated);
+      }
+    },
+    [currentFile?.id],
+  );
 
-  function clearAllFiles() {
+  const clearAllFiles = useCallback(() => {
     router.push("/");
     setFiles([]);
     setCurrentFile(null);
     localStorage.removeItem(LOCAL_STORAGE_KEY);
-  }
+  }, [router]);
 
   return {
     files,
