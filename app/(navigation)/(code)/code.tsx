@@ -191,7 +191,14 @@ export function Code() {
                       </InputSlot>
                     </Input>
 
-                    <FileUpload files={files} onFilesSelected={handleFilesSelected} onClearAll={clearAllFiles} />
+                    <FileUpload
+                      files={files}
+                      onFilesSelected={handleFilesSelected}
+                      onClearAll={() => {
+                        setSelectedFiles([]);
+                        clearAllFiles();
+                      }}
+                    />
                   </div>
 
                   {filteredFiles.length > 0 && (
