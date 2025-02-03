@@ -86,10 +86,12 @@ export function Code() {
       const single = files.find((f) => f.id === selectedFiles[0].id);
 
       if (single) {
-        handleChangeFile(single);
+        const fileExtension = path.extname(single.name).slice(1).toLowerCase();
+        const language = Object.values(LANGUAGES).find((lang) => lang.extensions?.includes(fileExtension));
 
+        handleChangeFile(single);
         setFileName(single.name);
-        setLanguage(LANGUAGES[path.extname(single.name).slice(1)] || null);
+        setLanguage(language || null);
         setCode(single.content);
       }
     }
