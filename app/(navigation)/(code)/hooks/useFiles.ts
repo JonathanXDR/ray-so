@@ -1,5 +1,6 @@
 "use client";
 
+import { Base64 } from "js-base64";
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 
@@ -7,7 +8,7 @@ export interface UserFile {
   id: string;
   name: string;
   content: string;
-  highlightDiff?: boolean;
+  isFromPatch: boolean;
 }
 
 const LOCAL_STORAGE_KEY = "raycast-user-files";
@@ -15,6 +16,7 @@ const LOCAL_STORAGE_KEY = "raycast-user-files";
 export function useFiles() {
   const [files, setFiles] = useState<UserFile[]>([]);
   const [currentFile, setCurrentFile] = useState<UserFile | null>(null);
+  const [hasPatch, setHasPatch] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -22,9 +24,13 @@ export function useFiles() {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (saved) {
       try {
-        const parsed: UserFile[] = JSON.parse(saved);
+        let parsed: UserFile[] = JSON.parse(saved);
+        parsed = parsed.map((f) => ({ ...f, content: Base64.decode(f.content) }));
         setFiles(parsed);
-        if (parsed.length > 0) setCurrentFile(parsed[0]);
+        if (parsed.length > 0) {
+          setCurrentFile(parsed[0]);
+          setHasPatch(parsed.some((f) => f.isFromPatch));
+        }
       } catch {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
       }
@@ -33,7 +39,14 @@ export function useFiles() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(files));
+
+    const encodedFiles = files.map((f) => ({
+      ...f,
+      content: Base64.encodeURI(f.content),
+    }));
+
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(encodedFiles));
+    setHasPatch(files.some((f) => f.isFromPatch));
   }, [files]);
 
   async function handleFilesSelected(selectedFiles: File[]) {
@@ -65,7 +78,7 @@ export function useFiles() {
             id: nanoid(),
             name: item.fileName,
             content: item.content || "",
-            highlightDiff: false,
+            isFromPatch: true,
           }));
 
           newFiles.push(...diffFiles);
@@ -78,7 +91,7 @@ export function useFiles() {
           id: nanoid(),
           name: file.name,
           content: fileContent,
-          highlightDiff: false,
+          isFromPatch: false,
         });
       }
     }
@@ -123,6 +136,7 @@ export function useFiles() {
   return {
     files,
     currentFile,
+    hasPatch,
     handleFilesSelected,
     handleChangeFile,
     removeFile,

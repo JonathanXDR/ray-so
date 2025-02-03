@@ -56,7 +56,7 @@ export function Code() {
   const [, setFlashMessage] = useAtom(derivedFlashMessageAtom);
   const [, setFlashShown] = useAtom(flashShownAtom);
 
-  const { files, currentFile, handleFilesSelected, handleChangeFile, removeFile, updateFile, clearAllFiles } =
+  const { files, currentFile, handleFilesSelected, handleChangeFile, removeFile, updateFile, clearAllFiles, hasPatch } =
     useFiles();
 
   const fileExtension = currentFile?.name ? path.extname(currentFile.name).slice(1) : undefined;
@@ -142,7 +142,7 @@ export function Code() {
         <div className={styles.sidebar}>
           <div className={styles.sidebarInner}>
             <ScrollArea>
-              <div className={cn(styles.sidebarContent, fileExtension !== "patch" && "justify-between")}>
+              <div className={cn(styles.sidebarContent, !hasPatch && "justify-between")}>
                 <div className={styles.sidebarNav}>
                   <div className="flex gap-3 mb-6">
                     <Input
@@ -222,7 +222,7 @@ export function Code() {
                   )}
                 </div>
 
-                {fileExtension === "patch" && (
+                {hasPatch && (
                   <>
                     <span className={styles.sidebarNavDivider}></span>
 
@@ -266,8 +266,6 @@ export function Code() {
                       <Collapsible.Content className={styles.summaryContent}>
                         {selectedFiles.map((file, index) => (
                           <div key={index} className={styles.summaryItem}>
-                            {/* display: inline-block; overflow: hidden; max-width: 140px; text-overflow: ellipsis;
-                            white-space: nowrap; */}
                             <p className="truncate max-w-[190px]">{file.name}</p>
                             <button
                               className={styles.summaryItemButton}

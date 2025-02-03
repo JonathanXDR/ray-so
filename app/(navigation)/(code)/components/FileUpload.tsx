@@ -63,8 +63,8 @@ export default function FileUpload({ files, onFilesSelected, onClearAll }: FileU
               <DialogContent size="small">
                 <div className="flex gap-8">
                   <div className="flex flex-col gap-3 flex-1 text-[13px] text-gray-11 leading-relaxed">
-                    <DialogTitle>Delete files?</DialogTitle>
-                    <p>Are you sure you want to delete all files?</p>
+                    <DialogTitle>Delete all files?</DialogTitle>
+                    <p>Are you sure you want to remove all uploaded files?</p>
                     <div className="flex justify-end gap-3 mt-3">
                       <Button variant="secondary" onClick={() => setIsOpen(false)}>
                         Cancel
