@@ -16,8 +16,15 @@ const config: Config = {
         background: "hsl(var(--background) / <alpha-value>)",
         panel: "hsl(var(--panel) / <alpha-value>)",
         brand: "hsl(var(--brand) / <alpha-value>)",
-        purple: "hsl(var(--purple) / <alpha-value>)",
-        blue: "hsl(var(--blue) / <alpha-value>)",
+        badge: {
+          red: "hsl(0 92% 64% / <alpha-value>)",
+          orange: "hsl(22 92% 64% / <alpha-value>)",
+          yellow: "hsl(43 100% 64% / <alpha-value>)",
+          green: "hsl(151 92% 64% / <alpha-value>)",
+          blue: "hsl(210 92% 55% / <alpha-value>)",
+          // purple: "hsl(256 92% 64% / <alpha-value>)",
+          magenta: "hsl(321 92% 64% / <alpha-value>)",
+        },
         gray: {
           1: "hsl(var(--gray-1) / <alpha-value>)",
           2: "hsl(var(--gray-2) / <alpha-value>)",

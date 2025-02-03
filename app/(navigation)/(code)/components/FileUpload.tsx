@@ -10,7 +10,7 @@ import type { UserFile } from "../hooks/useFiles";
 
 type FileUploadProps = {
   files: UserFile[];
-  onFilesSelected: (files: File[]) => Promise<void>;
+  onFilesSelected: (files: UserFile[]) => Promise<void>;
   onClearAll: () => void;
 };
 
@@ -23,7 +23,7 @@ export default function FileUpload({ files, onFilesSelected, onClearAll }: FileU
     if (!fileList || fileList.length === 0) return;
     setUploading(true);
     try {
-      const filesArray = Array.from(fileList);
+      const filesArray = Array.from(fileList).map((file) => file as unknown as UserFile);
       await onFilesSelected(filesArray);
     } catch (error: any) {
       console.error("Error uploading file:", error);

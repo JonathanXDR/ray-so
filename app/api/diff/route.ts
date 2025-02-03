@@ -1,44 +1,60 @@
+import { UserFile } from "@/app/(navigation)/(code)/hooks/useFiles";
 import gitDiffParser from "gitdiff-parser";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+/**
+ * Reconstruct the entire "new" file content from the changes.
+ * If file.type is 'delete', we can skip or produce an empty string.
+ */
+function reconstructFileContent(file: UserFile): string {
+  if (file.type === "delete") {
+    return "/* This file was deleted by the patch */";
+  }
+
+  const lines: string[] = [];
+
+  for (const hunk of file.hunks) {
+    let newLineIndex = hunk.newStart;
+
+    for (const change of hunk.changes) {
+      if (change.type === "normal" || change.type === "insert") {
+        let text = change.content;
+        if (text.startsWith(" ") || text.startsWith("+")) {
+          text = text.substring(1);
+        }
+        lines.push(text);
+        newLineIndex++;
+      }
+    }
+  }
+
+  if (lines.length === 0) {
+    return "/* No new content for this file or patch was empty. */";
+  }
+
+  return lines.join("\n");
+}
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const patchFile = formData.get("patchFile") as File | null;
+    const patchFile = formData.get("patchFile");
 
-    if (!patchFile) {
-      return NextResponse.json({ error: "Missing patchFile in form data" }, { status: 400 });
+    if (!patchFile || !(patchFile instanceof Blob)) {
+      return NextResponse.json({ error: "Missing or invalid patchFile in form data" }, { status: 400 });
     }
 
     const diffText = await patchFile.text();
     const parsed = gitDiffParser.parse(diffText);
 
-    const results = parsed.map((file) => {
-      // Remove any leading "b/" from the newPath
-      const cleaned = file.newPath.replace(/^b\//, "");
-
-      let newContent = "";
-
-      // Iterate over the hunks, then over each change
-      for (const hunk of file.hunks) {
-        for (const change of hunk.changes) {
-          // Only collect inserted lines (type === "insert")
-          if (change.type === "insert") {
-            // Optionally remove the leading "+"
-            newContent += change.content.replace(/^\+/, "") + "\n";
-          }
-        }
-      }
-
-      // If no inserted lines, optionally store some placeholder
-      if (!newContent.trim()) {
-        newContent = `/* No new lines for ${cleaned} */`;
-      }
+    const results = parsed.map((diffFile) => {
+      const cleanedNew = diffFile.newPath.replace(/^b\//, "") || "unknown.patch";
 
       return {
-        fileName: cleaned || "unknown.patch",
-        content: newContent,
+        ...diffFile,
+        name: cleanedNew,
+        content: reconstructFileContent(diffFile as UserFile),
       };
     });
 

@@ -1,22 +1,56 @@
 "use client";
 
+import { File as BufferFile } from "buffer";
+import { File as DiffFile } from "gitdiff-parser";
 import { Base64 } from "js-base64";
 import { nanoid } from "nanoid";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export interface UserFile {
-  id: string;
-  name: string;
-  content: string;
-  isFromPatch: boolean;
-}
+export type UserFile = Partial<BufferFile> &
+  DiffFile & {
+    name: string;
+    id: string;
+    content: string;
+    isFromPatch: boolean;
+  };
 
 const LOCAL_STORAGE_KEY = "raycast-user-files";
+
+function reconstructFullFileContent(file: any) {
+  // if the file was deleted, we can skip it unless the highlight option is enabled. In that case, we can return the full content but highlighted as deleted.
+
+  const lines: string[] = [];
+
+  for (const hunk of file.hunks) {
+    let newLineIndex = hunk.newStart;
+
+    for (const change of hunk.changes) {
+      if (change.type === "insert" || change.type === "normal") {
+        let lineText = change.content;
+        if (lineText.startsWith("+") || lineText.startsWith(" ")) {
+          lineText = lineText.substring(1);
+        }
+        lines.push(lineText);
+        newLineIndex++;
+      } else {
+      }
+    }
+  }
+
+  if (lines.length === 0) {
+    return "/* No new lines or the patch is empty for this file */";
+  }
+
+  return lines.join("\n");
+}
 
 export function useFiles() {
   const [files, setFiles] = useState<UserFile[]>([]);
   const [currentFile, setCurrentFile] = useState<UserFile | null>(null);
   const [hasPatch, setHasPatch] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -25,7 +59,10 @@ export function useFiles() {
     if (saved) {
       try {
         let parsed: UserFile[] = JSON.parse(saved);
-        parsed = parsed.map((f) => ({ ...f, content: Base64.decode(f.content) }));
+        parsed = parsed.map((f) => ({
+          ...f,
+          content: Base64.decode(f.content),
+        }));
         setFiles(parsed);
         if (parsed.length > 0) {
           setCurrentFile(parsed[0]);
@@ -44,18 +81,18 @@ export function useFiles() {
       ...f,
       content: Base64.encodeURI(f.content),
     }));
-
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(encodedFiles));
+
     setHasPatch(files.some((f) => f.isFromPatch));
   }, [files]);
 
-  async function handleFilesSelected(selectedFiles: File[]) {
+  async function handleFilesSelected(selectedFiles: UserFile[]) {
     const newFiles: UserFile[] = [];
 
     for (const file of selectedFiles) {
       if (file.name.endsWith(".patch")) {
         const formData = new FormData();
-        formData.append("patchFile", file);
+        formData.append("patchFile", file as unknown as Blob);
 
         try {
           const res = await fetch("/api/diff", {
@@ -67,50 +104,55 @@ export function useFiles() {
             continue;
           }
 
-          type DiffResult = {
-            fileName: string;
-            content: string;
-          };
-
           const data = await res.json();
 
-          const diffFiles: UserFile[] = data.results.map((item: DiffResult) => ({
-            id: nanoid(),
-            name: item.fileName,
-            content: item.content || "",
-            isFromPatch: true,
-          }));
+          const diffFiles: UserFile[] = data.results.map((item: UserFile) => {
+            return {
+              ...item,
+              id: nanoid(),
+              isFromPatch: true,
+            };
+          });
 
           newFiles.push(...diffFiles);
         } catch (err) {
           console.error("Error forwarding .patch file:", err);
         }
       } else {
-        const fileContent = await file.text();
+        const fileContent = (await file?.text?.()) ?? "";
         newFiles.push({
+          ...file,
           id: nanoid(),
-          name: file.name,
           content: fileContent,
           isFromPatch: false,
         });
       }
     }
 
-    setFiles(newFiles);
+    setFiles((prev) => {
+      const merged = [...prev, ...newFiles];
+      return merged;
+    });
+
     if (newFiles.length > 0) {
-      setCurrentFile(newFiles[0]);
+      selectFile(newFiles[0]);
     }
   }
 
-  function handleChangeFile(file: UserFile) {
+  function selectFile(file: UserFile) {
     setCurrentFile(file);
+  }
+
+  function handleChangeFile(file: UserFile) {
+    selectFile(file);
   }
 
   function removeFile(fileToRemove: UserFile) {
     setFiles((prev) => {
       const updated = prev.filter((f) => f.id !== fileToRemove.id);
+
       if (currentFile?.id === fileToRemove.id) {
-        return updated.length > 0 ? updated : [];
+        return updated;
       }
       return updated;
     });
@@ -128,6 +170,7 @@ export function useFiles() {
   }
 
   function clearAllFiles() {
+    router.push("/");
     setFiles([]);
     setCurrentFile(null);
     localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -142,5 +185,6 @@ export function useFiles() {
     removeFile,
     updateFile,
     clearAllFiles,
+    selectFile,
   };
 }

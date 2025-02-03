@@ -14,10 +14,12 @@ import {
   BlankDocumentIcon,
   CheckListIcon,
   ChevronDownIcon,
+  DeleteDocumentIcon,
   EyeDisabledIcon,
   EyeIcon,
   Info01Icon,
   MagnifyingGlassIcon,
+  NewDocumentIcon,
   TrashIcon,
 } from "@raycast/icons";
 import SelectionArea, { SelectionEvent } from "@viselect/react";
@@ -39,7 +41,8 @@ import { InfoDialog } from "./components/InfoDialog";
 import NoSSR from "./components/NoSSR";
 import { UploadInstructions } from "./components/UploadInstructions";
 import { useFiles, UserFile } from "./hooks/useFiles";
-import { highlighterAtom } from "./store";
+import { fileNameAtom, highlighterAtom } from "./store";
+import { codeAtom, selectedLanguageAtom } from "./store/code";
 import { derivedFlashMessageAtom, flashShownAtom } from "./store/flash";
 import FrameContextStore from "./store/FrameContextStore";
 import { shikiTheme } from "./store/themes";
@@ -56,11 +59,14 @@ export function Code() {
   const [, setFlashMessage] = useAtom(derivedFlashMessageAtom);
   const [, setFlashShown] = useAtom(flashShownAtom);
 
+  const [, setCode] = useAtom(codeAtom);
+  const [, setFileName] = useAtom(fileNameAtom);
+  const [, setLanguage] = useAtom(selectedLanguageAtom);
+
   const { files, currentFile, handleFilesSelected, handleChangeFile, removeFile, updateFile, clearAllFiles, hasPatch } =
     useFiles();
 
-  const fileExtension = currentFile?.name ? path.extname(currentFile.name).slice(1) : undefined;
-  const filteredFiles = files.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
+  const filteredFiles = files.filter((f) => f.name?.toLowerCase().includes(search.toLowerCase()));
 
   function selectAll() {
     setFlashMessage({ icon: <CheckListIcon />, message: "Selecting all files" });
@@ -78,9 +84,16 @@ export function Code() {
   useEffect(() => {
     if (selectedFiles.length === 1) {
       const single = files.find((f) => f.id === selectedFiles[0].id);
-      if (single) handleChangeFile(single);
+
+      if (single) {
+        handleChangeFile(single);
+
+        setFileName(single.name);
+        setLanguage(LANGUAGES[path.extname(single.name).slice(1)] || null);
+        setCode(single.content);
+      }
     }
-  }, [selectedFiles, files, handleChangeFile]);
+  }, [selectedFiles, files, handleChangeFile, setCode, setFileName]);
 
   useEffect(() => {
     getHighlighterCore({
@@ -130,6 +143,23 @@ export function Code() {
     });
   }
 
+  function handleNavItemClick(e: React.MouseEvent, file: UserFile) {
+    e.preventDefault();
+
+    if (e.metaKey || e.ctrlKey) {
+      setSelectedFiles((prev) => {
+        const isAlready = prev.some((f) => f.id === file.id);
+        if (isAlready) {
+          return prev.filter((f) => f.id !== file.id);
+        } else {
+          return [...prev, file];
+        }
+      });
+    } else {
+      setSelectedFiles([file]);
+    }
+  }
+
   return (
     <FrameContextStore>
       <NavigationActions>
@@ -158,6 +188,7 @@ export function Code() {
                         <MagnifyingGlassIcon className="w-3.5 h-3.5" />
                       </InputSlot>
                     </Input>
+
                     <FileUpload files={files} onFilesSelected={handleFilesSelected} onClearAll={clearAllFiles} />
                   </div>
 
@@ -209,10 +240,7 @@ export function Code() {
                                 key={file.id}
                                 file={file}
                                 isSelected={isSelected}
-                                onClick={() => {
-                                  handleChangeFile(file);
-                                  setSelectedFiles([file]);
-                                }}
+                                onClick={(e) => handleNavItemClick(e, file)}
                               />
                             );
                           })}
@@ -265,7 +293,7 @@ export function Code() {
 
                       <Collapsible.Content className={styles.summaryContent}>
                         {selectedFiles.map((file, index) => (
-                          <div key={index} className={styles.summaryItem}>
+                          <div key={file.id} className={styles.summaryItem}>
                             <p className="truncate max-w-[190px]">{file.name}</p>
                             <button
                               className={styles.summaryItemButton}
@@ -282,8 +310,6 @@ export function Code() {
 
                     <div className={styles.summaryControls}>
                       <ExportButton />
-
-                      {/* <Button onClick={() => setSelectedFiles([])}>Clear selected</Button> */}
                     </div>
                   </div>
                 )}
@@ -299,7 +325,11 @@ export function Code() {
                 files={files}
                 currentFile={currentFile}
                 handleFilesSelected={handleFilesSelected}
-                handleChangeFile={handleChangeFile}
+                handleChangeFile={(file) => {
+                  handleChangeFile(file);
+                  setCode(file.content);
+                  setFileName(file.name);
+                }}
               />
             )}
             <Controls />
@@ -313,22 +343,35 @@ export function Code() {
 type NavItemProps = {
   file: UserFile;
   isSelected: boolean;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
 };
 function NavItem({ file, isSelected, onClick }: NavItemProps) {
   return (
     <div
       className={cn("selectable", styles.sidebarNavItem)}
       data-file-id={file.id}
-      data-active={isSelected || undefined}
-      onClick={(e) => {
-        e.preventDefault();
-        onClick();
-      }}
+      data-active={isSelected ? "true" : undefined}
+      onClick={onClick}
     >
-      <BlankDocumentIcon />
+      {file.type === "add" && <NewDocumentIcon className="min-w-4" />}
+      {file.type === "delete" && <DeleteDocumentIcon className="min-w-4" />}
+      {file.type !== "add" && file.type !== "delete" && <BlankDocumentIcon className="min-w-4" />}
+
       <span className={styles.fileName}>{file.name}</span>
-      {/* For example a "badge"? <span className={styles.badge}>0</span> */}
+
+      <span
+        className={cn(styles.badge, {
+          "text-badge-green bg-badge-green/15": file.type === "add",
+          "text-badge-red bg-badge-red/15": file.type === "delete",
+          "text-badge-blue bg-badge-blue/15": file.type !== "add" && file.type !== "delete",
+        })}
+      >
+        {/* Show a sign according to the file type */}
+        {file.type === "add" && "+"}
+        {file.type === "delete" && "-"}
+        {file.type !== "add" && file.type !== "delete" && "~"}
+        {file.hunks.map((h) => h.changes.length).reduce((a, b) => a + b, 0)}
+      </span>
     </div>
   );
 }

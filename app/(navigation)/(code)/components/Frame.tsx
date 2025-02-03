@@ -304,7 +304,7 @@ interface FrameProps {
   code?: string;
   files: UserFile[];
   currentFile?: UserFile | null;
-  handleFilesSelected?: (files: File[]) => void;
+  handleFilesSelected?: (files: UserFile[]) => void;
   handleChangeFile: (file: UserFile) => void;
 }
 
