@@ -5,7 +5,6 @@ import { CSSTransition } from "react-transition-group";
 import XMarkIcon from "../assets/icons/x-mark-circle-filled-16.svg";
 import { UserFile } from "../hooks/useFiles";
 import { windowWidthAtom } from "../store";
-import { FileCarousel } from "./FileCarousel";
 import styles from "./ResizableFrame.module.css";
 
 type Handle = "right" | "left";
@@ -95,57 +94,48 @@ const ResizableFrame: React.FC<ResizableFrameProps> = ({ children, files, onChan
         {children}
       </div>
 
-      {(!!(windowWidth && !isResizing) || isResizing || (files && files.length !== 0)) && (
-        <FileCarousel
-          className="flex w-full mt-[1em]"
-          files={files}
-          onChangeFile={onChangeFile}
-          showButtons={files && files.length !== 0 && !isResizing}
-        >
-          <CSSTransition
-            nodeRef={resetWindowWidthRef}
-            in={!!(windowWidth && !isResizing)}
-            unmountOnExit
-            timeout={200}
-            classNames={{
-              enter: styles.fadeEnter,
-              enterActive: styles.fadeEnterActive,
-              exit: styles.fadeExit,
-              exitActive: styles.fadeExitActive,
+      <CSSTransition
+        nodeRef={resetWindowWidthRef}
+        in={!!(windowWidth && !isResizing)}
+        unmountOnExit
+        timeout={200}
+        classNames={{
+          enter: styles.fadeEnter,
+          enterActive: styles.fadeEnterActive,
+          exit: styles.fadeExit,
+          exitActive: styles.fadeExitActive,
+        }}
+      >
+        <div className={styles.resetWidthContainer} ref={resetWindowWidthRef}>
+          <a
+            className={styles.resetWidth}
+            onClick={(event) => {
+              event.preventDefault();
+              setWindowWidth(null);
             }}
           >
-            <div className={styles.resetWidthContainer} ref={resetWindowWidthRef}>
-              <a
-                className={styles.resetWidth}
-                onClick={(event) => {
-                  event.preventDefault();
-                  setWindowWidth(null);
-                }}
-              >
-                <XMarkIcon />
-                Set to auto width
-              </a>
-            </div>
-          </CSSTransition>
+            <XMarkIcon />
+            Set to auto width
+          </a>
+        </div>
+      </CSSTransition>
 
-          <CSSTransition
-            nodeRef={rulerRef}
-            in={isResizing}
-            unmountOnExit
-            timeout={200}
-            classNames={{
-              enter: styles.fadeEnter,
-              enterActive: styles.fadeEnterActive,
-              exit: styles.fadeExit,
-              exitActive: styles.fadeExitActive,
-            }}
-          >
-            <div ref={rulerRef} className={styles.ruler}>
-              <span>{windowWidth} px</span>
-            </div>
-          </CSSTransition>
-        </FileCarousel>
-      )}
+      <CSSTransition
+        nodeRef={rulerRef}
+        in={isResizing}
+        unmountOnExit
+        timeout={200}
+        classNames={{
+          enter: styles.fadeEnter,
+          enterActive: styles.fadeEnterActive,
+          exit: styles.fadeExit,
+          exitActive: styles.fadeExitActive,
+        }}
+      >
+        <div ref={rulerRef} className={styles.ruler}>
+          <span>{windowWidth} px</span>
+        </div>
+      </CSSTransition>
     </div>
   );
 };
