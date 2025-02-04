@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import React, { useContext, useEffect } from "react";
+import React, { RefObject, useContext, useEffect } from "react";
 import clerkPattern from "../assets/clerk/pattern.svg?url";
 import mintlifyPatternDark from "../assets/mintlify-pattern-dark.svg?url";
 import mintlifyPatternLight from "../assets/mintlify-pattern-light.svg?url";
@@ -10,12 +10,34 @@ import { fileNameAtom, showBackgroundAtom } from "../store";
 import { codeAtom, selectedLanguageAtom } from "../store/code";
 import { FrameContext } from "../store/FrameContextStore";
 import { paddingAtom } from "../store/padding";
-import { THEMES, darkModeAtom, themeAtom, themeBackgroundAtom } from "../store/themes";
+import { darkModeAtom, themeAtom, themeBackgroundAtom, themeCSSAtom, themeFontAtom, THEMES } from "../store/themes";
 import useIsSafari from "../util/useIsSafari";
+import BulkEditPlaceholder from "./BulkEditPlaceholder";
 import Editor from "./Editor";
 import FlashMessage from "./FlashMessage";
 import styles from "./Frame.module.css";
 import ResizableFrame from "./ResizableFrame";
+
+interface EphemeralProps {
+  ephemeralDarkMode?: boolean;
+  ephemeralTheme?: any;
+  ephemeralBackground?: boolean;
+  ephemeralPadding?: number;
+  ephemeralLineNumbers?: boolean;
+  ephemeralLanguage?: any;
+  ephemeralFileName?: string;
+  ephemeralCode?: string;
+  ephemeralRef?: RefObject<HTMLDivElement>;
+}
+
+interface FrameProps extends EphemeralProps {
+  resize?: boolean;
+  code?: string;
+  files: UserFile[];
+  currentFile?: UserFile | null;
+  handleChangeFile: (file: UserFile) => void;
+  selectedFiles: UserFile[];
+}
 
 const VercelFrame = () => {
   const [darkMode] = useAtom(darkModeAtom);
@@ -49,7 +71,7 @@ const SupabaseFrame = () => {
   const [padding] = useAtom(paddingAtom);
   const [showBackground] = useAtom(showBackgroundAtom);
   const [fileName, setFileName] = useAtom(fileNameAtom);
-  const [selectedLanguage, setSelectedLanguage] = useAtom(selectedLanguageAtom);
+  const [selectedLanguage] = useAtom(selectedLanguageAtom);
 
   return (
     <div
@@ -87,7 +109,6 @@ const TailwindFrame = () => {
   const [darkMode] = useAtom(darkModeAtom);
   const [padding] = useAtom(paddingAtom);
   const [showBackground] = useAtom(showBackgroundAtom);
-  const [fileName, setFileName] = useAtom(fileNameAtom);
   const isSafari = useIsSafari();
 
   return (
@@ -254,10 +275,12 @@ const DefaultFrame = () => {
   const [padding] = useAtom(paddingAtom);
   const isSafari = useIsSafari();
   const [showBackground] = useAtom(showBackgroundAtom);
-  const [fileName, setFileName] = useAtom(fileNameAtom);
-  const [themeBackground] = useAtom(themeBackgroundAtom);
   const [theme] = useAtom(themeAtom);
+  const [themeBackground] = useAtom(themeBackgroundAtom);
+  const [themeCSS] = useAtom(themeCSSAtom);
+  const [fileName, setFileName] = useAtom(fileNameAtom);
   const darkMode = useAtomValue(darkModeAtom);
+  const themeFont = useAtomValue(themeFontAtom);
 
   return (
     <div
@@ -267,7 +290,7 @@ const DefaultFrame = () => {
         darkMode && styles.darkMode,
         showBackground && styles.withBackground,
       )}
-      style={{ padding, backgroundImage: showBackground ? themeBackground : `` }}
+      style={{ padding, backgroundImage: showBackground ? themeBackground : "" }}
     >
       {!showBackground && <div data-ignore-in-export className={styles.transparentPattern}></div>}
       <div
@@ -275,6 +298,7 @@ const DefaultFrame = () => {
           [styles.withBorder]: !isSafari,
           [styles.withShadow]: !isSafari && showBackground,
         })}
+        style={themeCSS}
       >
         <div className={styles.header}>
           <div className={styles.controls}>
@@ -299,53 +323,71 @@ const DefaultFrame = () => {
   );
 };
 
-interface FrameProps {
-  resize?: boolean;
-  code?: string;
-  files: UserFile[];
-  currentFile?: UserFile | null;
-  handleFilesSelected?: (files: File[]) => void;
-  handleChangeFile: (file: UserFile) => void;
+function renderThemedFrame(selectedTheme: any) {
+  switch (selectedTheme.id) {
+    case THEMES.vercel.id:
+    case THEMES.rabbit.id:
+      return <VercelFrame />;
+    case THEMES.supabase.id:
+      return <SupabaseFrame />;
+    case THEMES.tailwind.id:
+      return <TailwindFrame />;
+    case THEMES.clerk.id:
+      return <ClerkFrame />;
+    case THEMES.mintlify.id:
+      return <MintlifyFrame />;
+    case THEMES.openai.id:
+      return <OpenAIFrame />;
+    case THEMES.prisma.id:
+      return <PrismaFrame />;
+    default:
+      return <DefaultFrame />;
+  }
 }
 
-const Frame = ({ resize = true, code, files, handleChangeFile }: FrameProps) => {
+const Frame = ({
+  resize = true,
+  code,
+  files,
+  currentFile,
+  handleChangeFile,
+  selectedFiles,
+  ephemeralDarkMode,
+  ephemeralTheme,
+  ephemeralBackground,
+  ephemeralPadding,
+  ephemeralLineNumbers,
+  ephemeralLanguage,
+  ephemeralFileName,
+  ephemeralCode,
+  ephemeralRef,
+}: FrameProps) => {
   const frameContext = useContext(FrameContext);
+
   const setCode = useSetAtom(codeAtom);
 
   useEffect(() => {
-    if (code) setCode(code);
-  }, [code, setCode]);
-  const [theme] = useAtom(themeAtom);
+    if (ephemeralCode != null) {
+      setCode(ephemeralCode);
+    } else if (code) {
+      setCode(code);
+    }
+  }, [code, ephemeralCode, setCode]);
+
+  const isMultiSelect = selectedFiles.length > 1;
+
+  const theme = useAtomValue(themeAtom);
   const darkMode = useAtomValue(darkModeAtom);
 
-  function renderFrame() {
-    switch (theme.id) {
-      case THEMES.vercel.id:
-      case THEMES.rabbit.id:
-        return <VercelFrame />;
-      case THEMES.supabase.id:
-        return <SupabaseFrame />;
-      case THEMES.tailwind.id:
-        return <TailwindFrame />;
-      case THEMES.clerk.id:
-        return <ClerkFrame />;
-      case THEMES.mintlify.id:
-        return <MintlifyFrame />;
-      case THEMES.openai.id:
-        return <OpenAIFrame />;
-      case THEMES.prisma.id:
-        return <PrismaFrame />;
-      default:
-        return <DefaultFrame />;
-    }
-  }
+  const effectiveTheme = ephemeralTheme ?? theme;
+  const effectiveDarkMode = ephemeralDarkMode ?? darkMode;
 
   return (
-    <div className={styles.frameContainer} data-theme={darkMode ? "dark" : "light"}>
+    <div className={styles.frameContainer} data-theme={effectiveDarkMode ? "dark" : "light"}>
       <ResizableFrame files={files} onChangeFile={handleChangeFile}>
         <FlashMessage />
-        <div className={styles.outerFrame} ref={frameContext} id="frame">
-          {renderFrame()}
+        <div ref={ephemeralRef ?? frameContext} className={styles.outerFrame} id="frame">
+          {isMultiSelect ? <BulkEditPlaceholder selectedFiles={selectedFiles} /> : renderThemedFrame(effectiveTheme)}
         </div>
       </ResizableFrame>
     </div>

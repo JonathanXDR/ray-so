@@ -84,7 +84,6 @@ export function Code() {
   useEffect(() => {
     if (selectedFiles.length === 1) {
       const single = files.find((f) => f.id === selectedFiles[0].id);
-
       if (single) {
         const fileExtension = path.extname(single.name).slice(1).toLowerCase();
         const language = Object.values(LANGUAGES).find((lang) => lang.extensions?.includes(fileExtension));
@@ -95,7 +94,7 @@ export function Code() {
         setCode(single.content);
       }
     }
-  }, [selectedFiles, files, handleChangeFile, setCode, setFileName]);
+  }, [selectedFiles, files, handleChangeFile, setCode, setFileName, setLanguage]);
 
   useEffect(() => {
     getHighlighterCore({
@@ -167,7 +166,8 @@ export function Code() {
       <NavigationActions>
         <InfoDialog />
         <FormatButton />
-        <ExportButton />
+        {/* Pass the selectedFiles to ExportButton so it can handle bulk exports */}
+        <ExportButton selectedFiles={selectedFiles} />
       </NavigationActions>
 
       <div className={styles.main}>
@@ -319,7 +319,7 @@ export function Code() {
                     </Collapsible.Root>
 
                     <div className={styles.summaryControls}>
-                      <ExportButton />
+                      <ExportButton selectedFiles={selectedFiles} />
                     </div>
                   </div>
                 )}
@@ -334,12 +334,14 @@ export function Code() {
               <Frame
                 files={files}
                 currentFile={currentFile}
-                handleFilesSelected={handleFilesSelected}
+                code={currentFile?.content}
                 handleChangeFile={(file) => {
                   handleChangeFile(file);
                   setCode(file.content);
                   setFileName(file.name);
                 }}
+                // Pass the selected files to show BulkEditPlaceholder if multi
+                selectedFiles={selectedFiles}
               />
             )}
             <Controls />
@@ -384,7 +386,6 @@ function NavItem({ file, isSelected, onClick }: NavItemProps) {
             "text-blue bg-blue/15": file.type !== "add" && file.type !== "delete",
           })}
         >
-          {/* Show a sign according to the file type */}
           {file.type === "add" && "+"}
           {file.type === "delete" && "-"}
           {file.type !== "add" && file.type !== "delete" && "~"}

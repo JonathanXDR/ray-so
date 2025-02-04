@@ -13,7 +13,7 @@ export type UserFile = Partial<BufferFile> &
     isFromPatch: boolean;
   };
 
-const LOCAL_STORAGE_KEY = "raycast-user-files";
+const LOCAL_STORAGE_KEY = "files";
 
 function reconstructFullFileContent(file: UserFile) {
   if (file.type === "delete") {
