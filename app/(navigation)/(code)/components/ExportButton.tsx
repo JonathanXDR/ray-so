@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/dropdown-menu";
 import { Kbd, Kbds } from "@/components/kbd";
-import { CircleProgressIcon, DownloadIcon, CircleProgressIcon as SpinnerIcon } from "@raycast/icons";
+import { ChevronDownIcon, CircleProgressIcon, DownloadIcon } from "@raycast/icons";
 import { track } from "@vercel/analytics";
 import { saveAs } from "file-saver";
 import hotkeys from "hotkeys-js";
@@ -163,6 +163,7 @@ const ExportButton: React.FC<ExportButtonProps> = (props) => {
 
   const [, setFlashMessage] = useAtom(derivedFlashMessageAtom);
   const [, setFlashShown] = useAtom(flashShownAtom);
+  const [isExporting, setIsExporting] = useState(false);
 
   const customFileName = useAtomValue(fileNameAtom);
   const fileName = customFileName.replaceAll(" ", "-") || "ray-so-export";
@@ -181,7 +182,8 @@ const ExportButton: React.FC<ExportButtonProps> = (props) => {
 
   async function singleFileToPng() {
     try {
-      setFlashMessage({ icon: <SpinnerIcon className="animate-spin" />, message: "Exporting PNG..." });
+      setIsExporting(true);
+      setFlashMessage({ icon: <CircleProgressIcon className="animate-spin" />, message: "Exporting PNG..." });
 
       const frame = document.getElementById("frame") as HTMLDivElement | null;
       if (!frame) throw new Error("No main #frame found in normal UI");
@@ -191,12 +193,15 @@ const ExportButton: React.FC<ExportButtonProps> = (props) => {
     } catch (err) {
       console.error(err);
       setFlashMessage({ icon: <ImageIcon />, message: "Export failed!", timeout: 2000 });
+    } finally {
+      setIsExporting(false);
     }
   }
 
   async function singleFileToSvg() {
     try {
-      setFlashMessage({ icon: <SpinnerIcon className="animate-spin" />, message: "Exporting SVG..." });
+      setIsExporting(true);
+      setFlashMessage({ icon: <CircleProgressIcon className="animate-spin" />, message: "Exporting SVG..." });
       const frame = document.getElementById("frame") as HTMLDivElement | null;
       if (!frame) throw new Error("No main #frame found in normal UI");
       const dataUrl = await toSvg(frame);
@@ -205,12 +210,15 @@ const ExportButton: React.FC<ExportButtonProps> = (props) => {
     } catch (err) {
       console.error(err);
       setFlashMessage({ icon: <ImageIcon />, message: "Export failed!", timeout: 2000 });
+    } finally {
+      setIsExporting(false);
     }
   }
 
   async function singleFileCopyPng() {
     try {
-      setFlashMessage({ icon: <SpinnerIcon className="animate-spin" />, message: "Copying PNG..." });
+      setIsExporting(true);
+      setFlashMessage({ icon: <CircleProgressIcon className="animate-spin" />, message: "Copying PNG..." });
       const frame = document.getElementById("frame") as HTMLDivElement | null;
       if (!frame) throw new Error("No main #frame found in normal UI");
       const blob = await toBlob(frame, { pixelRatio: exportSize });
@@ -221,94 +229,120 @@ const ExportButton: React.FC<ExportButtonProps> = (props) => {
     } catch (err) {
       console.error(err);
       setFlashMessage({ icon: <ClipboardIcon />, message: "Copy failed!", timeout: 2000 });
+    } finally {
+      setIsExporting(false);
     }
   }
 
   const bulkExportPng = async () => {
-    setFlashMessage({
-      icon: <SpinnerIcon className="animate-spin" />,
-      message: "Exporting PNGs...",
-    });
+    try {
+      setIsExporting(true);
+      setFlashMessage({
+        icon: <CircleProgressIcon className="animate-spin" />,
+        message: "Exporting PNGs...",
+      });
 
-    const zip = new JSZip();
-    const sanitizedExportName = fileName || "ray-so-export";
+      const zip = new JSZip();
+      const sanitizedExportName = fileName || "ray-so-export";
 
-    for (const f of selectedFiles) {
-      const dataUrl = await renderFileEphemeral(
-        f,
-        {
-          ephemeralDarkMode: darkMode,
-          ephemeralTheme: theme,
-          ephemeralBackground: showBackground,
-          ephemeralPadding: padding,
-          ephemeralLineNumbers: lineNumbers,
-          ephemeralLanguage: selectedLanguage,
-          ephemeralCode: f.content,
-        },
-        "png",
-        exportSize,
-      );
+      for (const f of selectedFiles) {
+        const dataUrl = await renderFileEphemeral(
+          f,
+          {
+            ephemeralDarkMode: darkMode,
+            ephemeralTheme: theme,
+            ephemeralBackground: showBackground,
+            ephemeralPadding: padding,
+            ephemeralLineNumbers: lineNumbers,
+            ephemeralLanguage: selectedLanguage,
+            ephemeralCode: f.content,
+          },
+          "png",
+          exportSize,
+        );
 
-      const nameNoSpaces = f.name.trim().length ? f.name.replaceAll(" ", "-") : "untitled";
-      zip.file(`${nameNoSpaces}.png`, dataUrl.split(",")[1], { base64: true });
+        const nameNoSpaces = f.name.trim().length ? f.name.replaceAll(" ", "-") : "untitled";
+        zip.file(`${nameNoSpaces}.png`, dataUrl.split(",")[1], { base64: true });
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      saveAs(zipBlob, `${sanitizedExportName}-bulk.zip`);
+      setFlashMessage({ icon: <ImageIcon />, message: "Export complete!", timeout: 2000 });
+    } catch (err) {
+      console.error(err);
+      setFlashMessage({ icon: <ImageIcon />, message: "Export failed!", timeout: 2000 });
+    } finally {
+      setIsExporting(false);
     }
-
-    const zipBlob = await zip.generateAsync({ type: "blob" });
-    saveAs(zipBlob, `${sanitizedExportName}-bulk.zip`);
-    setFlashMessage({ icon: <ImageIcon />, message: "Export complete!", timeout: 2000 });
   };
 
   const bulkSaveSvg = async () => {
-    setFlashMessage({ icon: <SpinnerIcon className="animate-spin" />, message: "Exporting SVGs..." });
+    try {
+      setIsExporting(true);
+      setFlashMessage({ icon: <CircleProgressIcon className="animate-spin" />, message: "Exporting SVGs..." });
 
-    const zip = new JSZip();
-    const sanitizedExportName = fileName || "ray-so-export";
+      const zip = new JSZip();
+      const sanitizedExportName = fileName || "ray-so-export";
 
-    for (const f of selectedFiles) {
-      const dataUrl = await renderFileEphemeral(
-        f,
-        {
-          ephemeralDarkMode: darkMode,
-          ephemeralTheme: theme,
-          ephemeralBackground: showBackground,
-          ephemeralPadding: padding,
-          ephemeralLineNumbers: lineNumbers,
-          ephemeralLanguage: selectedLanguage,
-          ephemeralCode: f.content,
-        },
-        "svg",
-        exportSize,
-      );
-      const nameNoSpaces = f.name.trim().length ? f.name.replaceAll(" ", "-") : "untitled";
-      const svgContent = dataUrl.replace(/^data:image\/svg\+xml.*?,/, "");
-      zip.file(`${nameNoSpaces}.svg`, svgContent);
+      for (const f of selectedFiles) {
+        const dataUrl = await renderFileEphemeral(
+          f,
+          {
+            ephemeralDarkMode: darkMode,
+            ephemeralTheme: theme,
+            ephemeralBackground: showBackground,
+            ephemeralPadding: padding,
+            ephemeralLineNumbers: lineNumbers,
+            ephemeralLanguage: selectedLanguage,
+            ephemeralCode: f.content,
+          },
+          "svg",
+          exportSize,
+        );
+        const nameNoSpaces = f.name.trim().length ? f.name.replaceAll(" ", "-") : "untitled";
+        const svgContent = dataUrl.replace(/^data:image\/svg\+xml.*?,/, "");
+        zip.file(`${nameNoSpaces}.svg`, svgContent);
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      saveAs(zipBlob, `${sanitizedExportName}-bulk.zip`);
+      setFlashMessage({ icon: <ImageIcon />, message: "Export complete!", timeout: 2000 });
+    } catch (err) {
+      console.error(err);
+      setFlashMessage({ icon: <ImageIcon />, message: "Export failed!", timeout: 2000 });
+    } finally {
+      setIsExporting(false);
     }
-
-    const zipBlob = await zip.generateAsync({ type: "blob" });
-    saveAs(zipBlob, `${sanitizedExportName}-bulk.zip`);
-    setFlashMessage({ icon: <ImageIcon />, message: "Export complete!", timeout: 2000 });
   };
 
   const bulkCopyUrl = async () => {
-    setFlashMessage({ icon: <CircleProgressIcon className="animate-spin" />, message: "Copying URLs..." });
+    try {
+      setIsExporting(true);
+      setFlashMessage({ icon: <CircleProgressIcon className="animate-spin" />, message: "Copying URLs..." });
 
-    const baseUrl = window.location.toString();
-    const lines: string[] = [];
+      const baseUrl = window.location.toString();
+      const lines: string[] = [];
 
-    for (const f of selectedFiles) {
-      const base = new URL(baseUrl);
-      const sp = new URLSearchParams(base.hash.replace(/^#/, ""));
-      sp.set("title", f.name);
-      sp.set("code", Base64.encodeURI(f.content));
-      lines.push(`${base.origin}/#${sp.toString()}`);
+      for (const f of selectedFiles) {
+        const base = new URL(baseUrl);
+        const sp = new URLSearchParams(base.hash.replace(/^#/, ""));
+        sp.set("title", f.name);
+        sp.set("code", Base64.encodeURI(f.content));
+        lines.push(`${base.origin}/#${sp.toString()}`);
+      }
+      await navigator.clipboard.writeText(lines.join("\n"));
+
+      setFlashMessage({
+        icon: <ClipboardIcon />,
+        message: `URLs copied to clipboard!`,
+        timeout: 2000,
+      });
+    } catch (err) {
+      console.error(err);
+      setFlashMessage({ icon: <ClipboardIcon />, message: "Copy failed!", timeout: 2000 });
+    } finally {
+      setIsExporting(false);
     }
-    await navigator.clipboard.writeText(lines.join("\n"));
-
-    setFlashMessage({
-      icon: <ClipboardIcon />,
-      message: `URLs copied to clipboard!`,
-      timeout: 2000,
-    });
   };
 
   const handleExportClick: MouseEventHandler = (event) => {
@@ -337,22 +371,30 @@ const ExportButton: React.FC<ExportButtonProps> = (props) => {
   };
 
   async function copyUrl() {
-    setFlashMessage({ icon: <SpinnerIcon className="animate-spin" />, message: "Copying URL..." });
-    if (noneSelected) return;
-    if (multiSelect) {
-      await bulkCopyUrl();
-      return;
-    }
+    try {
+      setIsExporting(true);
+      setFlashMessage({ icon: <CircleProgressIcon className="animate-spin" />, message: "Copying URL..." });
+      if (noneSelected) return;
+      if (multiSelect) {
+        await bulkCopyUrl();
+        return;
+      }
 
-    const url = window.location.toString();
-    let urlToCopy = url;
-    const encodedUrl = encodeURIComponent(url);
-    const response = await fetch(`/api/shorten-url?url=${encodedUrl}&ref=codeImage`).then((res) => res.json());
-    if (response.link) {
-      urlToCopy = response.link;
+      const url = window.location.toString();
+      let urlToCopy = url;
+      const encodedUrl = encodeURIComponent(url);
+      const response = await fetch(`/api/shorten-url?url=${encodedUrl}&ref=codeImage`).then((res) => res.json());
+      if (response.link) {
+        urlToCopy = response.link;
+      }
+      await navigator.clipboard.writeText(urlToCopy);
+      setFlashMessage({ icon: <ClipboardIcon />, message: "URL Copied to clipboard!", timeout: 2000 });
+    } catch (err) {
+      console.error(err);
+      setFlashMessage({ icon: <ClipboardIcon />, message: "Copy failed!", timeout: 2000 });
+    } finally {
+      setIsExporting(false);
     }
-    await navigator.clipboard.writeText(urlToCopy);
-    setFlashMessage({ icon: <ClipboardIcon />, message: "URL Copied to clipboard!", timeout: 2000 });
   }
 
   useEffect(() => {
@@ -415,17 +457,13 @@ const ExportButton: React.FC<ExportButtonProps> = (props) => {
         disabled={disabled}
         {...buttonProps}
       >
-        <DownloadIcon className="w-4 h-4" />
-        Export <span className="hidden md:inline-block">Image</span>
+        {isExporting ? <CircleProgressIcon className="w-4 h-4 animate-spin" /> : <DownloadIcon className="w-4 h-4" />}
+        Export <span className="hidden md:inline-block">{multiSelect ? "Images" : "Image"}</span>
       </Button>
       <DropdownMenu open={dropdownOpen} onOpenChange={(open) => setDropdownOpen(open)}>
         <DropdownMenuTrigger asChild>
           <Button variant="primary" aria-label="See other export options" className="w-1/5" disabled={disabled}>
-            <CircleProgressIcon style={{ opacity: 0, position: "absolute" }} />
-            {/* hidden icon for spacing */}
-            <span style={{ position: "relative", left: "-8px" }}>
-              <svg width="1" height="1" />
-            </span>
+            <ChevronDownIcon className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="end">
