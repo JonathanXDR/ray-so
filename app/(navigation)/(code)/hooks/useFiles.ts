@@ -55,7 +55,6 @@ function saveFilesToStorage(files: UserFile[]) {
       content: Base64.encode(file.content),
     }));
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(encodedFiles));
-    console.log("Saved files to localStorage:", encodedFiles);
   } catch (error) {
     console.error("Error saving files to localStorage:", error);
   }
@@ -65,7 +64,6 @@ function loadFilesFromStorage(): UserFile[] {
   try {
     const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!savedData) {
-      console.log("No saved files found in localStorage");
       return [];
     }
 
@@ -80,7 +78,6 @@ function loadFilesFromStorage(): UserFile[] {
       content: Base64.decode(file.content),
     }));
 
-    console.log("Loaded files from localStorage:", decodedFiles);
     return decodedFiles;
   } catch (error) {
     console.error("Error loading files from localStorage:", error);
