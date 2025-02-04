@@ -47,8 +47,8 @@ export function useSectionInViewObserver({ headerHeight, enabled = false }: Conf
         // get the top-most section fully in view (top is closest to zero)
         newEntryInView = fullyInView.reduce((previousCandidate, currentCandidate) =>
           previousCandidate.target.getBoundingClientRect().top > currentCandidate.target.getBoundingClientRect().top
-            ? currentCandidate
-            : previousCandidate,
+            ? previousCandidate
+            : currentCandidate,
         );
       } else {
         // get the section closest to the crossing border (top is closest to half-viewport mark)
@@ -97,11 +97,8 @@ export function useSectionInViewObserver({ headerHeight, enabled = false }: Conf
       // Focus the section so AT announces the new content after navigation.
       section?.focus({ preventScroll: true });
 
-      // Get latest state key if this was a page reload, or the current state key otherwise.
-      const key = isPageReload.current ? undefined : window.history.state.key;
+      const key = isPageReload.current ? undefined : window.history.state?.key;
       const restoredScrollTop = getScrollHistory(key);
-      console.log("restoredScrollTop", restoredScrollTop);
-
       if (shouldRestore && restoredScrollTop) {
         window.scrollTo({ top: 0 });
         window.scrollTo({ top: restoredScrollTop });
@@ -196,9 +193,13 @@ export function useSectionInViewObserver({ headerHeight, enabled = false }: Conf
       setScrollHistory(historyKey.current, window.scrollY);
     };
 
+    // Safely handle key from history state
     if (!historyKey.current) {
-      // set a different key if session state isn't empty?
-      historyKey.current = window.history.state.key;
+      if (window.history.state?.key) {
+        historyKey.current = window.history.state.key;
+      } else {
+        historyKey.current = "initial";
+      }
     }
 
     const adjustScrollRecursively = () => {
@@ -208,12 +209,6 @@ export function useSectionInViewObserver({ headerHeight, enabled = false }: Conf
         adjustScrollRecursively();
       });
     };
-
-    // If the router isn't ready, it's a fully fresh page load.
-    // Start adjusting the scroll position if we are not doing that yet.
-    if (!animationFrame.current) {
-      adjustScrollRecursively();
-    }
 
     const navigationEntry = window.performance.getEntriesByType("navigation")[0] as
       | PerformanceNavigationTiming
