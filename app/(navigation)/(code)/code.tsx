@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/scroll-area";
 import { Switch } from "@/components/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/tooltip";
 import { cn } from "@/utils/cn";
+import { isTouchDevice } from "@/utils/isTouchDevice";
 import useHotkeys from "@/utils/useHotkeys";
 import { useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
 import * as Collapsible from "@radix-ui/react-collapsible";
@@ -46,7 +47,6 @@ import { codeAtom, selectedLanguageAtom } from "./store/code";
 import { derivedFlashMessageAtom, flashShownAtom } from "./store/flash";
 import FrameContextStore from "./store/FrameContextStore";
 import { shikiTheme } from "./store/themes";
-import { isTouchDevice } from "./util/isTouchDevice";
 import { LANGUAGES } from "./util/languages";
 
 export function Code() {

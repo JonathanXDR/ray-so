@@ -1,26 +1,17 @@
 "use client";
 /* eslint-disable react/no-unescaped-entities */
-import React from "react";
-import SelectionArea, { SelectionEvent } from "@viselect/react";
-import { useRouter } from "next/navigation";
-import copy from "copy-to-clipboard";
-import { Select, SelectItem, SelectContent, SelectItemText, SelectTrigger, SelectValue } from "@/components/select";
-import { SnippetsIcon } from "../components/Icons";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/dropdown-menu";
-import { Toast, ToastTitle } from "../components/Toast";
-import { ScrollArea } from "@/components/scroll-area";
+import { getRaycastFlavor } from "@/app/RaycastFlavor";
 import { Button } from "@/components/button";
+import { ButtonGroup } from "@/components/button-group";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/dropdown-menu";
+import { Kbd, Kbds } from "@/components/kbd";
+import { NavigationActions } from "@/components/navigation";
+import { ScrollArea } from "@/components/scroll-area";
+import { Select, SelectContent, SelectItem, SelectItemText, SelectTrigger, SelectValue } from "@/components/select";
+import { BASE_URL } from "@/utils/common";
+import { useSectionInView, useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
 import * as Collapsible from "@radix-ui/react-collapsible";
-import { isTouchDevice } from "../utils/isTouchDevice";
-
-import styles from "./snippets.module.css";
-import { Instructions } from "../components/Instructions";
 import {
   ChevronDownIcon,
   CogIcon,
@@ -30,17 +21,19 @@ import {
   PlusCircleIcon,
   TrashIcon,
 } from "@raycast/icons";
-import { extractSnippets } from "../utils/extractSnippets";
+import SelectionArea, { SelectionEvent } from "@viselect/react";
+import copy from "copy-to-clipboard";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { isTouchDevice } from "../../../../utils/isTouchDevice";
 import { IconComponent } from "../components/IconComponent";
-import { Category, Snippet, snippetGroups } from "../snippets";
-import { useSectionInView, useSectionInViewObserver } from "@/utils/useSectionInViewObserver";
-import { BASE_URL } from "@/utils/common";
-import { NavigationActions } from "@/components/navigation";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/dialog";
-import { ButtonGroup } from "@/components/button-group";
+import { SnippetsIcon } from "../components/Icons";
 import { InfoDialog } from "../components/InfoDialog";
-import { Kbd, Kbds } from "@/components/kbd";
-import { getRaycastFlavor } from "@/app/RaycastFlavor";
+import { Instructions } from "../components/Instructions";
+import { Toast, ToastTitle } from "../components/Toast";
+import { Category, Snippet, snippetGroups } from "../snippets";
+import { extractSnippets } from "../utils/extractSnippets";
+import styles from "./snippets.module.css";
 
 const modifiers = ["!", ":", "_", "__", "-", "@", "@@", "$", ";", ";;", "/", "//", "none"] as const;
 
