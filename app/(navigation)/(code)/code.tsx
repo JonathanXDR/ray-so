@@ -371,7 +371,7 @@ function NavItem({ file, isSelected, onClick }: NavItemProps) {
 
       <span
         className={cn(styles.fileName, {
-          "max-w-[140px]": file.hunks && file.type,
+          "max-w-[120px]": file.hunks && file.type,
           "max-w-[190px]": !file.hunks || !file.type,
         })}
       >
