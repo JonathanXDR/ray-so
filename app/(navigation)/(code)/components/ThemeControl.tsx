@@ -1,23 +1,22 @@
-import { useAtom, useSetAtom } from "jotai";
-import React, { useEffect } from "react";
-import { themeAtom, THEMES, Theme, unlockedThemesAtom } from "../store/themes";
-import ControlContainer from "./ControlContainer";
-
-import styles from "./ThemeControl.module.css";
-import useHotkeys from "../../../../utils/useHotkeys";
-import { paddingAtom } from "../store/padding";
 import {
   Select,
   SelectContent,
-  SelectTrigger,
   SelectGroup,
   SelectItem,
   SelectLabel,
   SelectSeparator,
+  SelectTrigger,
   SelectValue,
 } from "@/components/select";
 import { SelectItemText } from "@radix-ui/react-select";
 import { ChevronUpIcon } from "@raycast/icons";
+import { useAtom } from "jotai";
+import React, { useEffect } from "react";
+import useHotkeys from "../../../../utils/useHotkeys";
+import { paddingAtom } from "../store/padding";
+import { Theme, themeAtom, THEMES, unlockedThemesAtom } from "../store/themes";
+import ControlContainer from "./ControlContainer";
+import styles from "./ThemeControl.module.css";
 
 const ThemeControl: React.FC = () => {
   const [currentTheme, atomSetTheme] = useAtom(themeAtom);
@@ -39,7 +38,7 @@ const ThemeControl: React.FC = () => {
     }
   }, [currentTheme, setPadding]);
 
-  useHotkeys("c", () => {
+  useHotkeys("t", () => {
     const availableThemes = Object.values(THEMES).filter((theme) => unlockedThemes.includes(theme.id) || !theme.hidden);
     const currentIndex = availableThemes.indexOf(currentTheme);
     if (Object.values(availableThemes)[currentIndex + 1]) {

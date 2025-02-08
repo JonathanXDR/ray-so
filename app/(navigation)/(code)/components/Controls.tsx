@@ -3,7 +3,9 @@ import { UserFile } from "../hooks/useFiles";
 import BackgroundControl from "./BackgroundControl";
 import styles from "./Controls.module.css";
 import DarkModeControl from "./DarkModeControl";
+import HiddenCharsControl from "./HiddenCharsControl";
 import LanguageControl from "./LanguageControl";
+import LineHeightControl from "./LineHeightControl";
 import PaddingControl from "./PaddingControl";
 import ThemeControl from "./ThemeControl";
 
@@ -18,7 +20,9 @@ const Controls: React.FC<ControlsProps> = ({ files, selectedFiles }) => {
       <ThemeControl />
       <BackgroundControl />
       <DarkModeControl />
+      <HiddenCharsControl />
       <PaddingControl />
+      <LineHeightControl />
       {files.length > 0 && !(selectedFiles.length > 1) && <LanguageControl />}
     </div>
   );
