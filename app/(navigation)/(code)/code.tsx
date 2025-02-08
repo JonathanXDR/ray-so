@@ -344,7 +344,7 @@ export function Code() {
                 selectedFiles={selectedFiles}
               />
             )}
-            <Controls />
+            <Controls files={files} selectedFiles={selectedFiles} />
           </NoSSR>
         </div>
       </div>

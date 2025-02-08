@@ -1,21 +1,25 @@
 import React from "react";
-
-import styles from "./Controls.module.css";
+import { UserFile } from "../hooks/useFiles";
 import BackgroundControl from "./BackgroundControl";
+import styles from "./Controls.module.css";
 import DarkModeControl from "./DarkModeControl";
-import ExportButton from "./ExportButton";
 import LanguageControl from "./LanguageControl";
 import PaddingControl from "./PaddingControl";
 import ThemeControl from "./ThemeControl";
 
-const Controls: React.FC = () => {
+interface ControlsProps {
+  files: UserFile[];
+  selectedFiles: UserFile[];
+}
+
+const Controls: React.FC<ControlsProps> = ({ files, selectedFiles }) => {
   return (
     <div className={styles.controls}>
       <ThemeControl />
       <BackgroundControl />
       <DarkModeControl />
       <PaddingControl />
-      <LanguageControl />
+      {files.length > 0 && !(selectedFiles.length > 1) && <LanguageControl />}
     </div>
   );
 };
