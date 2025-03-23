@@ -8,6 +8,7 @@ import LanguageControl from "./LanguageControl";
 import LineHeightControl from "./LineHeightControl";
 import PaddingControl from "./PaddingControl";
 import ThemeControl from "./ThemeControl";
+import LineNumberControl from "./LineNumberControl";
 
 interface ControlsProps {
   files: UserFile[];
@@ -20,6 +21,7 @@ const Controls: React.FC<ControlsProps> = ({ files, selectedFiles }) => {
       <ThemeControl />
       <BackgroundControl />
       <DarkModeControl />
+      <LineNumberControl />
       <HiddenCharsControl />
       <PaddingControl />
       <LineHeightControl />
